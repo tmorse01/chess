@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900;
+    @apply min-h-screen;
+    @apply text-white;
+    @apply font-sans;
+  }
+}
+
+@layer components {
+  .frosted-glass {
+    @apply bg-white/10;
+    @apply backdrop-blur-md;
+    @apply border border-white/20;
+    @apply rounded-2xl;
+    @apply shadow-2xl;
+  }
+
+  .button-primary {
+    @apply px-6 py-3;
+    @apply bg-white/20;
+    @apply hover:bg-white/30;
+    @apply backdrop-blur-sm;
+    @apply border border-white/30;
+    @apply rounded-lg;
+    @apply font-semibold;
+    @apply transition-all;
+    @apply cursor-pointer;
+    @apply text-white;
+  }
+
+  .button-primary:hover {
+    @apply shadow-lg;
+    @apply scale-105;
+  }
+
+  .button-primary:active {
+    @apply scale-95;
+  }
+
+  .input-field {
+    @apply px-4 py-2;
+    @apply bg-white/10;
+    @apply backdrop-blur-sm;
+    @apply border border-white/30;
+    @apply rounded-lg;
+    @apply text-white;
+    @apply placeholder-white/50;
+    @apply focus:outline-none;
+    @apply focus:ring-2;
+    @apply focus:ring-white/50;
+    @apply transition-all;
+  }
+}

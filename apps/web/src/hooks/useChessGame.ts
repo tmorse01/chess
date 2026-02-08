@@ -113,14 +113,24 @@ export function useChessGame({ gameId, token }: UseChessGameOptions): UseChessGa
   // Make a move
   const makeMove = useCallback(
     (from: string, to: string, promotion?: string) => {
-      console.log('[useChessGame] makeMove called:', { from, to, promotion, isConnected, status });
+      console.log('[useChessGame] makeMove called:', {
+        from,
+        to,
+        promotion,
+        isConnected,
+        socketConnected: socket?.connected,
+        status,
+        playerColor,
+      });
 
       if (!socket || !isConnected) {
         console.log(
           '[useChessGame] Cannot make move: not connected. Socket:',
           !!socket,
           'isConnected:',
-          isConnected
+          isConnected,
+          'socket.connected:',
+          socket?.connected
         );
         setError('Not connected to server');
         return;

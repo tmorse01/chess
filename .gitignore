@@ -39,3 +39,6 @@ pnpm-debug.log*
 .temp/
 .tmp/
 *.tsbuildinfo
+
+# Drizzle
+apps/api/drizzle/*.sql

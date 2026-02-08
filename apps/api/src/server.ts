@@ -1,14 +1,29 @@
 import express, { type Request, type Response, type NextFunction, type Express } from 'express';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { gamesRouter } from './routes/games.js';
+import { setupGameHandlers } from './sockets/game-handler.js';
 
 // Load environment variables
 dotenv.config();
 
 const app: Express = express();
+const httpServer = createServer(app);
 const PORT = process.env.PORT || 3001;
 const CORS_ORIGIN = process.env.CORS_ORIGIN || 'http://localhost:5173';
+
+// Initialize Socket.IO
+const io = new Server(httpServer, {
+  cors: {
+    origin: CORS_ORIGIN,
+    methods: ['GET', 'POST'],
+  },
+});
+
+// Set up socket event handlers
+setupGameHandlers(io);
 
 // Middleware
 app.use(cors({ origin: CORS_ORIGIN }));
@@ -38,9 +53,10 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
 
 // Start server (only if not in test mode)
 if (process.env.NODE_ENV !== 'test') {
-  app.listen(PORT, () => {
+  httpServer.listen(PORT, () => {
     console.log(`🚀 API server running on http://localhost:${PORT}`);
+    console.log(`🔌 Socket.IO server ready`);
   });
 }
 
-export { app };
+export { app, httpServer, io };

@@ -1,4 +1,9 @@
 import { useState } from 'react';
+import { Copy, Check } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface GameInfoProps {
   gameId: string;
@@ -63,8 +68,10 @@ export function GameInfo({
     <div className="space-y-6">
       {/* Connection Status */}
       <div className="flex items-center gap-2">
-        <div className={`w-3 h-3 rounded-full ${isConnected ? 'bg-green-400' : 'bg-red-400'}`} />
-        <span className="text-sm text-white/70">{isConnected ? 'Connected' : 'Disconnected'}</span>
+        <Badge variant={isConnected ? 'default' : 'destructive'} className="gap-2">
+          <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-300' : 'bg-red-300'}`} />
+          {isConnected ? 'Connected' : 'Disconnected'}
+        </Badge>
       </div>
 
       {/* Game ID */}
@@ -92,7 +99,7 @@ export function GameInfo({
       <div className="space-y-2">
         <h2 className="text-sm font-semibold text-white/70">Current Turn</h2>
         <div className="flex items-center gap-3">
-          <div className={`w-4 h-4 rounded ${getTurnIndicatorColor()}`} />
+          <div className={`w-4 h-4 rounded ${getTurnIndicatorColor()} border border-white/20`} />
           <span className="text-lg font-semibold">{getTurnText()}</span>
         </div>
       </div>
@@ -100,36 +107,55 @@ export function GameInfo({
       {/* Share Link */}
       <div className="space-y-2">
         <h2 className="text-sm font-semibold text-white/70">Share Link</h2>
-        <button onClick={copyShareLink} className="button-primary w-full text-sm">
-          {copied ? '✓ Copied!' : 'Copy Share Link'}
-        </button>
+        <Button
+          onClick={copyShareLink}
+          variant="outline"
+          className="w-full text-sm bg-white/10 hover:bg-white/20 border-white/30"
+        >
+          {copied ? (
+            <>
+              <Check className="mr-2 h-4 w-4" />
+              Copied!
+            </>
+          ) : (
+            <>
+              <Copy className="mr-2 h-4 w-4" />
+              Copy Share Link
+            </>
+          )}
+        </Button>
       </div>
 
       {/* Game Actions */}
       {status === 'active' && playerColor && (
-        <div className="space-y-3 pt-4 border-t border-white/10">
-          <button
-            onClick={onOfferDraw}
-            className="w-full px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-400/30 rounded-lg transition-all text-sm font-semibold"
-          >
-            Offer Draw
-          </button>
-          <button
-            onClick={onResign}
-            className="w-full px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-400/30 rounded-lg transition-all text-sm font-semibold"
-          >
-            Resign
-          </button>
-        </div>
+        <>
+          <Separator className="bg-white/10" />
+          <div className="space-y-3">
+            <Button
+              onClick={onOfferDraw}
+              variant="outline"
+              className="w-full bg-blue-500/10 hover:bg-blue-500/20 border-blue-400/30 text-blue-200"
+            >
+              Offer Draw
+            </Button>
+            <Button
+              onClick={onResign}
+              variant="destructive"
+              className="w-full bg-red-500/20 hover:bg-red-500/30 border-red-400/30"
+            >
+              Resign
+            </Button>
+          </div>
+        </>
       )}
 
       {/* Status Message */}
       {status === 'waiting' && (
-        <div className="mt-4 p-4 bg-yellow-500/10 border border-yellow-400/30 rounded-lg">
-          <p className="text-sm text-yellow-200/90">
+        <Alert className="bg-yellow-500/10 border-yellow-400/30">
+          <AlertDescription className="text-sm text-yellow-200/90">
             Share this link with your opponent to start the game!
-          </p>
-        </div>
+          </AlertDescription>
+        </Alert>
       )}
     </div>
   );

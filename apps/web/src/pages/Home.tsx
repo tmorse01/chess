@@ -1,5 +1,9 @@
 import { useState } from 'react';
 import type { CreateGameResponse } from '@chess-app/shared';
+import { Copy } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
@@ -47,17 +51,13 @@ function Home() {
             <p className="text-white/80 mb-6">
               Create a new game and share the links with your opponent
             </p>
-            <button
-              onClick={createGame}
-              disabled={loading}
-              className="button-primary disabled:opacity-50 disabled:cursor-not-allowed"
-            >
+            <Button onClick={createGame} disabled={loading} size="lg" className="w-auto mx-auto">
               {loading ? 'Creating Game...' : 'Create New Game'}
-            </button>
+            </Button>
             {error && (
-              <p className="text-red-300 mt-4 p-3 bg-red-500/20 rounded-lg border border-red-500/30">
-                {error}
-              </p>
+              <Alert variant="destructive" className="mt-4 bg-red-500/20 border-red-500/30">
+                <AlertDescription className="text-red-300">{error}</AlertDescription>
+              </Alert>
             )}
           </div>
         ) : (
@@ -70,38 +70,42 @@ function Home() {
               <div className="bg-white/5 p-4 rounded-lg border border-white/20">
                 <h3 className="text-sm font-semibold mb-2 text-white/60">White Player Link</h3>
                 <div className="flex gap-2">
-                  <input
+                  <Input
                     type="text"
                     value={gameData.whiteUrl}
                     readOnly
-                    className="input-field flex-1 text-sm"
+                    className="flex-1 text-sm bg-white/10 border-white/30 text-white"
                   />
-                  <button
+                  <Button
                     onClick={() => copyToClipboard(gameData.whiteUrl)}
-                    className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-all"
+                    variant="outline"
+                    size="icon"
+                    className="bg-white/20 hover:bg-white/30 border-white/30"
                     title="Copy to clipboard"
                   >
-                    📋
-                  </button>
+                    <Copy className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
 
               <div className="bg-white/5 p-4 rounded-lg border border-white/20">
                 <h3 className="text-sm font-semibold mb-2 text-white/60">Black Player Link</h3>
                 <div className="flex gap-2">
-                  <input
+                  <Input
                     type="text"
                     value={gameData.blackUrl}
                     readOnly
-                    className="input-field flex-1 text-sm"
+                    className="flex-1 text-sm bg-white/10 border-white/30 text-white"
                   />
-                  <button
+                  <Button
                     onClick={() => copyToClipboard(gameData.blackUrl)}
-                    className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-all"
+                    variant="outline"
+                    size="icon"
+                    className="bg-white/20 hover:bg-white/30 border-white/30"
                     title="Copy to clipboard"
                   >
-                    📋
-                  </button>
+                    <Copy className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
             </div>
@@ -111,9 +115,13 @@ function Home() {
                 Share these links with the players. Each link is unique and allows only that player
                 to make moves.
               </p>
-              <button onClick={() => setGameData(null)} className="button-primary">
+              <Button
+                onClick={() => setGameData(null)}
+                variant="outline"
+                className="bg-white/20 hover:bg-white/30 border-white/30"
+              >
                 Create Another Game
-              </button>
+              </Button>
             </div>
           </div>
         )}

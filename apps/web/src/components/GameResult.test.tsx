@@ -30,7 +30,7 @@ describe('GameResult', () => {
 
       expect(screen.getByText('You Won!')).toBeInTheDocument();
       expect(screen.getByText('White wins by checkmate')).toBeInTheDocument();
-      expect(screen.getByText('🏆')).toBeInTheDocument();
+      expect(screen.getByTestId('trophy-icon')).toBeInTheDocument();
     });
 
     it('should show "You Won!" when player wins by checkmate as black', () => {
@@ -42,7 +42,7 @@ describe('GameResult', () => {
 
       expect(screen.getByText('You Won!')).toBeInTheDocument();
       expect(screen.getByText('Black wins by checkmate')).toBeInTheDocument();
-      expect(screen.getByText('🏆')).toBeInTheDocument();
+      expect(screen.getByTestId('trophy-icon')).toBeInTheDocument();
     });
 
     it('should show "You Lost" when player loses by checkmate as white', () => {
@@ -54,7 +54,7 @@ describe('GameResult', () => {
 
       expect(screen.getByText('You Lost')).toBeInTheDocument();
       expect(screen.getByText('Black wins by checkmate')).toBeInTheDocument();
-      expect(screen.getByText('😔')).toBeInTheDocument();
+      expect(screen.getByTestId('frown-icon')).toBeInTheDocument();
     });
 
     it('should show "You Lost" when player loses by checkmate as black', () => {
@@ -66,7 +66,7 @@ describe('GameResult', () => {
 
       expect(screen.getByText('You Lost')).toBeInTheDocument();
       expect(screen.getByText('White wins by checkmate')).toBeInTheDocument();
-      expect(screen.getByText('😔')).toBeInTheDocument();
+      expect(screen.getByTestId('frown-icon')).toBeInTheDocument();
     });
   });
 
@@ -104,7 +104,7 @@ describe('GameResult', () => {
 
       expect(screen.getByText('Game Drawn')).toBeInTheDocument();
       expect(screen.getByText('Game drawn by stalemate')).toBeInTheDocument();
-      expect(screen.getByText('🤝')).toBeInTheDocument();
+      expect(screen.getByTestId('handshake-icon')).toBeInTheDocument();
     });
   });
 
@@ -118,7 +118,7 @@ describe('GameResult', () => {
 
       expect(screen.getByText('Game Drawn')).toBeInTheDocument();
       expect(screen.getByText('Game drawn by agreement')).toBeInTheDocument();
-      expect(screen.getByText('🤝')).toBeInTheDocument();
+      expect(screen.getByTestId('handshake-icon')).toBeInTheDocument();
     });
   });
 

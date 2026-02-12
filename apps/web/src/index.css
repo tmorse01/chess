@@ -1,6 +1,46 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+@theme {
+  /* Chess-specific colors */
+  --color-chess-dark: #312e2b;
+  --color-chess-light: #b7c0d8;
+
+  /* shadcn/ui theme colors */
+  --color-background: oklch(100% 0 0);
+  --color-foreground: oklch(9% 0 0);
+  --color-card: oklch(100% 0 0);
+  --color-card-foreground: oklch(9% 0 0);
+  --color-popover: oklch(100% 0 0);
+  --color-popover-foreground: oklch(9% 0 0);
+  --color-primary: oklch(9% 0 0);
+  --color-primary-foreground: oklch(98% 0 0);
+  --color-secondary: oklch(96.1% 0 0);
+  --color-secondary-foreground: oklch(9% 0 0);
+  --color-muted: oklch(96.1% 0 0);
+  --color-muted-foreground: oklch(45.1% 0 0);
+  --color-accent: oklch(96.1% 0 0);
+  --color-accent-foreground: oklch(9% 0 0);
+  --color-destructive: oklch(60.2% 0.177 29.2);
+  --color-destructive-foreground: oklch(98% 0 0);
+  --color-border: oklch(89.8% 0 0);
+  --color-input: oklch(89.8% 0 0);
+  --color-ring: oklch(9% 0 0);
+
+  /* Chart colors */
+  --color-chart-1: oklch(61% 0.154 29.2);
+  --color-chart-2: oklch(39% 0.099 200.5);
+  --color-chart-3: oklch(24% 0.056 253.8);
+  --color-chart-4: oklch(66% 0.127 96.6);
+  --color-chart-5: oklch(67% 0.126 55.7);
+
+  /* Border radius */
+  --radius-sm: calc(0.5rem - 4px);
+  --radius-md: calc(0.5rem - 2px);
+  --radius-lg: 0.5rem;
+
+  /* Backdrop blur */
+  --blur-xs: 2px;
+}
 
 @layer base {
   body {

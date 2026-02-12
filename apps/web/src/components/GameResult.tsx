@@ -1,5 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import type { GameResult as GameResultType, EndReason } from '@chess-app/shared';
+import { Trophy, Handshake, Frown } from 'lucide-react';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 
 interface GameResultProps {
   result: GameResultType;
@@ -66,37 +69,59 @@ export function GameResult({ result, endedReason, playerColor }: GameResultProps
   const isDraw = result === 'draw';
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      <div className="frosted-glass p-8 max-w-md w-full text-center space-y-6">
+    <Dialog open={true}>
+      <DialogContent
+        className="frosted-glass border-white/20 max-w-md text-center"
+        aria-labelledby="game-result-title"
+        aria-describedby="game-result-description"
+      >
         {/* Result Title */}
         <div className="space-y-2">
           <h2
+            id="game-result-title"
             className={`text-4xl font-bold ${
               isVictory ? 'text-green-400' : isDraw ? 'text-yellow-400' : 'text-red-400'
             }`}
           >
             {getResultTitle()}
           </h2>
-          <p className="text-xl text-white/80">{getResultDescription()}</p>
+          <p id="game-result-description" className="text-xl text-white/80">
+            {getResultDescription()}
+          </p>
         </div>
 
-        {/* Trophy/Icon */}
-        <div className="text-6xl">
-          {isVictory && '🏆'}
-          {isDraw && '🤝'}
-          {!isVictory && !isDraw && '😔'}
+        {/* Icon */}
+        <div className="flex justify-center py-4">
+          {isVictory && (
+            <Trophy
+              className="w-24 h-24 text-yellow-400"
+              data-testid="trophy-icon"
+              aria-hidden="true"
+            />
+          )}
+          {isDraw && (
+            <Handshake
+              className="w-24 h-24 text-blue-400"
+              data-testid="handshake-icon"
+              aria-hidden="true"
+            />
+          )}
+          {!isVictory && !isDraw && (
+            <Frown
+              className="w-24 h-24 text-slate-400"
+              data-testid="frown-icon"
+              aria-hidden="true"
+            />
+          )}
         </div>
 
         {/* Action Buttons */}
         <div className="space-y-3">
-          <button
-            onClick={handleNewGame}
-            className="w-full bg-white/20 hover:bg-white/30 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 border border-white/30"
-          >
+          <Button onClick={handleNewGame} className="w-full" size="lg">
             New Game
-          </button>
+          </Button>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

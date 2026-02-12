@@ -4,6 +4,7 @@ import { AddressInfo } from 'net';
 import { httpServer, io } from '../server.js';
 import { db } from '../db/client.js';
 import { games } from '../db/schema.js';
+import { eq } from 'drizzle-orm';
 
 describe('Socket.IO Game Handler Integration Tests', () => {
   let serverPort: number;
@@ -61,27 +62,37 @@ describe('Socket.IO Game Handler Integration Tests', () => {
     ]);
   });
 
-  afterEach(() => {
-    // Close socket clients
-    if (whiteSocket.connected) whiteSocket.close();
-    if (blackSocket.connected) blackSocket.close();
+  afterEach(async () => {
+    // Close socket clients and wait for disconnection
+    if (whiteSocket?.connected) {
+      whiteSocket.disconnect();
+    }
+    if (blackSocket?.connected) {
+      blackSocket.disconnect();
+    }
+    
+    // Wait for sockets to fully disconnect
+    await new Promise(resolve => setTimeout(resolve, 100));
+    // Note: Not cleaning up database records - accumulating test data is fine for test DB
   });
 
   it('should allow two clients to join the same game', async () => {
-    const whiteStatePromise = new Promise<void>((resolve) => {
+    const whiteStatePromise = new Promise<void>((resolve, reject) => {
       whiteSocket.once('game_state', (data) => {
         expect(data.playerColor).toBe('w');
         expect(data.fen).toBeDefined();
         resolve();
       });
+      whiteSocket.once('game_error', (data) => reject(new Error(`White failed to join: ${data.message}`)));
     });
 
-    const blackStatePromise = new Promise<void>((resolve) => {
+    const blackStatePromise = new Promise<void>((resolve, reject) => {
       blackSocket.once('game_state', (data) => {
         expect(data.playerColor).toBe('b');
         expect(data.fen).toBeDefined();
         resolve();
       });
+      blackSocket.once('game_error', (data) => reject(new Error(`Black failed to join: ${data.message}`)));
     });
 
     whiteSocket.emit('join_game', { gameId, token: whiteToken });
@@ -97,16 +108,18 @@ describe('Socket.IO Game Handler Integration Tests', () => {
 
   it('should enforce turn rules via sockets', async () => {
     // Set up listener for move rejection
-    const rejectionPromise = new Promise<any>((resolve) => {
+    const rejectionPromise = new Promise<any>((resolve, reject) => {
       blackSocket.once('move_rejected', (data) => resolve(data));
+      blackSocket.once('game_error', (data) => reject(new Error(`Failed to join: ${data.message}`)));
     });
 
     // Black joins
     blackSocket.emit('join_game', { gameId, token: blackToken });
 
     // Wait for join to complete
-    await new Promise<void>((resolve) => {
+    await new Promise<void>((resolve, reject) => {
       blackSocket.once('game_state', () => resolve());
+      blackSocket.once('game_error', (data) => reject(new Error(`Failed to join: ${data.message}`)));
     });
 
     // Try to move as black when it's white's turn
@@ -123,19 +136,21 @@ describe('Socket.IO Game Handler Integration Tests', () => {
 
   it('should reject invalid moves', async () => {
     // Set up listener for move rejection
-    const rejectionPromise = new Promise<any>((resolve) => {
+    const rejectionPromise = new Promise<any>((resolve, reject) => {
       whiteSocket.once('move_rejected', (data) => resolve(data));
+      whiteSocket.once('game_error', (data) => reject(new Error(`Failed: ${data.message}`)));
     });
 
     // White joins
     whiteSocket.emit('join_game', { gameId, token: whiteToken });
 
     // Wait for join to complete
-    await new Promise<void>((resolve) => {
+    await new Promise<void>((resolve, reject) => {
       whiteSocket.once('game_state', () => resolve());
+      whiteSocket.once('game_error', (data) => reject(new Error(`Failed to join: ${data.message}`)));
     });
 
-    // Try an illegal move
+    // Try an illegal move (e2 to e5 is illegal - pawn can't move 3 squares)
     whiteSocket.emit('make_move', {
       gameId,
       token: whiteToken,

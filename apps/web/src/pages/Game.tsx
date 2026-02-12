@@ -3,6 +3,7 @@ import { useChessGame } from '../hooks/useChessGame';
 import { ChessBoard } from '../components/ChessBoard';
 import { GameInfo } from '../components/GameInfo';
 import { GameResult } from '../components/GameResult';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 function Game() {
   const { gameId } = useParams<{ gameId: string }>();
@@ -58,9 +59,9 @@ function Game() {
 
         {/* Error Message */}
         {error && (
-          <div className="p-4 mb-4 border rounded-lg bg-red-500/20 border-red-400/30">
-            <p className="text-sm text-red-200">{error}</p>
-          </div>
+          <Alert variant="destructive" className="mb-4 bg-red-500/20 border-red-400/30">
+            <AlertDescription className="text-sm text-red-200">{error}</AlertDescription>
+          </Alert>
         )}
 
         {/* Main Game Layout */}

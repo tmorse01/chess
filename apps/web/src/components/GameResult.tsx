@@ -71,21 +71,27 @@ export function GameResult({ result, endedReason, playerColor }: GameResultProps
   return (
     <Dialog open={true}>
       <DialogContent
-        className="frosted-glass border-white/20 max-w-md text-center"
+        className="max-w-md text-center frosted-glass"
         aria-labelledby="game-result-title"
         aria-describedby="game-result-description"
+        data-testid="game-result-modal"
       >
         {/* Result Title */}
         <div className="space-y-2">
           <h2
             id="game-result-title"
             className={`text-4xl font-bold ${
-              isVictory ? 'text-green-400' : isDraw ? 'text-yellow-400' : 'text-red-400'
+              isVictory ? 'text-success' : isDraw ? 'text-warning' : 'text-destructive'
             }`}
+            data-testid="result-title"
           >
             {getResultTitle()}
           </h2>
-          <p id="game-result-description" className="text-xl text-white/80">
+          <p
+            id="game-result-description"
+            className="text-xl text-muted-foreground"
+            data-testid="result-message"
+          >
             {getResultDescription()}
           </p>
         </div>
@@ -94,21 +100,21 @@ export function GameResult({ result, endedReason, playerColor }: GameResultProps
         <div className="flex justify-center py-4">
           {isVictory && (
             <Trophy
-              className="w-24 h-24 text-yellow-400"
+              className="w-24 h-24 text-warning"
               data-testid="trophy-icon"
               aria-hidden="true"
             />
           )}
           {isDraw && (
             <Handshake
-              className="w-24 h-24 text-blue-400"
+              className="w-24 h-24 text-info"
               data-testid="handshake-icon"
               aria-hidden="true"
             />
           )}
           {!isVictory && !isDraw && (
             <Frown
-              className="w-24 h-24 text-slate-400"
+              className="w-24 h-24 text-muted-foreground"
               data-testid="frown-icon"
               aria-hidden="true"
             />
@@ -117,7 +123,12 @@ export function GameResult({ result, endedReason, playerColor }: GameResultProps
 
         {/* Action Buttons */}
         <div className="space-y-3">
-          <Button onClick={handleNewGame} className="w-full" size="lg">
+          <Button
+            onClick={handleNewGame}
+            className="w-full"
+            size="lg"
+            data-testid="new-game-button"
+          >
             New Game
           </Button>
         </div>

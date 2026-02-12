@@ -5,33 +5,41 @@
   --color-chess-dark: #312e2b;
   --color-chess-light: #b7c0d8;
 
-  /* shadcn/ui theme colors */
+  /* shadcn/ui violet theme colors - Light mode */
   --color-background: oklch(100% 0 0);
-  --color-foreground: oklch(9% 0 0);
+  --color-foreground: oklch(15% 0.02 285);
   --color-card: oklch(100% 0 0);
-  --color-card-foreground: oklch(9% 0 0);
+  --color-card-foreground: oklch(15% 0.02 285);
   --color-popover: oklch(100% 0 0);
-  --color-popover-foreground: oklch(9% 0 0);
-  --color-primary: oklch(9% 0 0);
-  --color-primary-foreground: oklch(98% 0 0);
-  --color-secondary: oklch(96.1% 0 0);
-  --color-secondary-foreground: oklch(9% 0 0);
-  --color-muted: oklch(96.1% 0 0);
-  --color-muted-foreground: oklch(45.1% 0 0);
-  --color-accent: oklch(96.1% 0 0);
-  --color-accent-foreground: oklch(9% 0 0);
+  --color-popover-foreground: oklch(15% 0.02 285);
+  --color-primary: oklch(45% 0.15 285);
+  --color-primary-foreground: oklch(98% 0.01 285);
+  --color-secondary: oklch(96% 0.02 285);
+  --color-secondary-foreground: oklch(15% 0.02 285);
+  --color-muted: oklch(96% 0.02 285);
+  --color-muted-foreground: oklch(50% 0.03 285);
+  --color-accent: oklch(96% 0.02 285);
+  --color-accent-foreground: oklch(15% 0.02 285);
   --color-destructive: oklch(60.2% 0.177 29.2);
   --color-destructive-foreground: oklch(98% 0 0);
-  --color-border: oklch(89.8% 0 0);
-  --color-input: oklch(89.8% 0 0);
-  --color-ring: oklch(9% 0 0);
+  --color-border: oklch(90% 0.02 285);
+  --color-input: oklch(90% 0.02 285);
+  --color-ring: oklch(45% 0.15 285);
 
-  /* Chart colors */
-  --color-chart-1: oklch(61% 0.154 29.2);
-  --color-chart-2: oklch(39% 0.099 200.5);
-  --color-chart-3: oklch(24% 0.056 253.8);
-  --color-chart-4: oklch(66% 0.127 96.6);
-  --color-chart-5: oklch(67% 0.126 55.7);
+  /* Additional semantic colors */
+  --color-success: oklch(65% 0.15 150);
+  --color-success-foreground: oklch(98% 0.01 150);
+  --color-warning: oklch(75% 0.15 85);
+  --color-warning-foreground: oklch(20% 0.03 85);
+  --color-info: oklch(60% 0.15 240);
+  --color-info-foreground: oklch(98% 0.01 240);
+
+  /* Chart colors with violet tint */
+  --color-chart-1: oklch(61% 0.154 285);
+  --color-chart-2: oklch(55% 0.12 310);
+  --color-chart-3: oklch(50% 0.10 265);
+  --color-chart-4: oklch(66% 0.127 290);
+  --color-chart-5: oklch(60% 0.14 275);
 
   /* Border radius */
   --radius-sm: calc(0.5rem - 4px);
@@ -42,35 +50,74 @@
   --blur-xs: 2px;
 }
 
+@media (prefers-color-scheme: dark) {
+  @theme {
+    --color-background: oklch(15% 0.02 285);
+    --color-foreground: oklch(98% 0.01 285);
+    --color-card: oklch(18% 0.03 285);
+    --color-card-foreground: oklch(98% 0.01 285);
+    --color-popover: oklch(15% 0.02 285);
+    --color-popover-foreground: oklch(98% 0.01 285);
+    --color-primary: oklch(75% 0.15 285);
+    --color-primary-foreground: oklch(15% 0.02 285);
+    --color-secondary: oklch(25% 0.03 285);
+    --color-secondary-foreground: oklch(98% 0.01 285);
+    --color-muted: oklch(25% 0.03 285);
+    --color-muted-foreground: oklch(65% 0.04 285);
+    --color-accent: oklch(30% 0.05 285);
+    --color-accent-foreground: oklch(98% 0.01 285);
+    --color-destructive: oklch(65% 0.19 29.2);
+    --color-destructive-foreground: oklch(98% 0 0);
+    --color-border: oklch(25% 0.03 285);
+    --color-input: oklch(30% 0.04 285);
+    --color-ring: oklch(75% 0.15 285);
+
+    /* Semantic colors for dark mode */
+    --color-success: oklch(70% 0.18 150);
+    --color-success-foreground: oklch(15% 0.02 150);
+    --color-warning: oklch(80% 0.18 85);
+    --color-warning-foreground: oklch(20% 0.03 85);
+    --color-info: oklch(70% 0.18 240);
+    --color-info-foreground: oklch(15% 0.02 240);
+
+    /* Chart colors for dark mode */
+    --color-chart-1: oklch(65% 0.18 285);
+    --color-chart-2: oklch(60% 0.15 310);
+    --color-chart-3: oklch(55% 0.12 265);
+    --color-chart-4: oklch(70% 0.16 290);
+    --color-chart-5: oklch(65% 0.17 275);
+  }
+}
+
 @layer base {
   body {
-    @apply bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900;
+    @apply bg-gradient-to-br from-violet-950 via-violet-900 to-indigo-950;
     @apply min-h-screen;
-    @apply text-white;
+    @apply text-foreground;
     @apply font-sans;
   }
 }
 
 @layer components {
   .frosted-glass {
-    @apply bg-white/10;
+    @apply bg-card/50;
     @apply backdrop-blur-md;
-    @apply border border-white/20;
+    @apply border border-border;
     @apply rounded-2xl;
     @apply shadow-2xl;
   }
 
   .button-primary {
     @apply px-6 py-3;
-    @apply bg-white/20;
-    @apply hover:bg-white/30;
+    @apply bg-primary/20;
+    @apply hover:bg-primary/30;
     @apply backdrop-blur-sm;
-    @apply border border-white/30;
+    @apply border border-border;
     @apply rounded-lg;
     @apply font-semibold;
     @apply transition-all;
     @apply cursor-pointer;
-    @apply text-white;
+    @apply text-primary-foreground;
   }
 
   .button-primary:hover {
@@ -84,15 +131,15 @@
 
   .input-field {
     @apply px-4 py-2;
-    @apply bg-white/10;
+    @apply bg-primary/10;
     @apply backdrop-blur-sm;
-    @apply border border-white/30;
+    @apply border border-border;
     @apply rounded-lg;
-    @apply text-white;
-    @apply placeholder-white/50;
+    @apply text-foreground;
+    @apply placeholder-muted-foreground;
     @apply focus:outline-none;
     @apply focus:ring-2;
-    @apply focus:ring-white/50;
+    @apply focus:ring-ring;
     @apply transition-all;
   }
 }

@@ -42,3 +42,7 @@ pnpm-debug.log*
 
 # Drizzle
 apps/api/drizzle/*.sql
+
+# Test results
+test-results/
+playwright-report/

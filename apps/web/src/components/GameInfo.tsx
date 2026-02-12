@@ -68,58 +68,69 @@ export function GameInfo({
     <div className="space-y-6">
       {/* Connection Status */}
       <div className="flex items-center gap-2">
-        <Badge variant={isConnected ? 'default' : 'destructive'} className="gap-2">
-          <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-300' : 'bg-red-300'}`} />
+        <Badge
+          variant={isConnected ? 'default' : 'destructive'}
+          className="gap-2"
+          data-testid="connection-status"
+        >
+          <div
+            className={`w-2 h-2 rounded-full ${isConnected ? 'bg-success' : 'bg-destructive'}`}
+          />
           {isConnected ? 'Connected' : 'Disconnected'}
         </Badge>
       </div>
 
       {/* Game ID */}
       <div className="space-y-2">
-        <h2 className="text-sm font-semibold text-white/70">Game ID</h2>
-        <p className="text-lg font-mono text-white/90 break-all">{gameId.substring(0, 8)}...</p>
+        <h2 className="text-sm font-semibold text-muted-foreground">Game ID</h2>
+        <p className="font-mono text-lg break-all">{gameId.substring(0, 8)}...</p>
       </div>
 
       {/* Player Color */}
       {playerColor && (
         <div className="space-y-2">
-          <h2 className="text-sm font-semibold text-white/70">You are playing</h2>
+          <h2 className="text-sm font-semibold text-muted-foreground">You are playing</h2>
           <div className="flex items-center gap-2">
             <div
               className={`w-6 h-6 rounded ${
-                playerColor === 'white' ? 'bg-white' : 'bg-gray-900 border border-white/30'
+                playerColor === 'white' ? 'bg-white' : 'bg-gray-900 border border-border'
               }`}
             />
-            <span className="text-lg font-semibold capitalize">{playerColor}</span>
+            <span className="text-lg font-semibold capitalize" data-testid="player-color">
+              {playerColor}
+            </span>
           </div>
         </div>
       )}
 
       {/* Turn Indicator */}
       <div className="space-y-2">
-        <h2 className="text-sm font-semibold text-white/70">Current Turn</h2>
+        <h2 className="text-sm font-semibold text-muted-foreground">Current Turn</h2>
         <div className="flex items-center gap-3">
-          <div className={`w-4 h-4 rounded ${getTurnIndicatorColor()} border border-white/20`} />
-          <span className="text-lg font-semibold">{getTurnText()}</span>
+          <div className={`w-4 h-4 rounded ${getTurnIndicatorColor()} border border-border`} />
+          <span className="text-lg font-semibold" data-testid="current-turn">
+            {getTurnText()}
+          </span>
         </div>
       </div>
 
       {/* Share Link */}
       <div className="space-y-2">
-        <h2 className="text-sm font-semibold text-white/70">Share Link</h2>
+        <h2 className="text-sm font-semibold text-muted-foreground">Share Link</h2>
         <Button
           onClick={copyShareLink}
           variant="outline"
-          className="w-full text-sm bg-white/10 hover:bg-white/20 border-white/30"
+          className="w-full text-sm"
+          data-testid="copy-link-button"
         >
           {copied ? (
             <>
-              <Check className="mr-2 h-4 w-4" />
+              <Check className="w-4 h-4 mr-2" />
               Copied!
             </>
           ) : (
             <>
-              <Copy className="mr-2 h-4 w-4" />
+              <Copy className="w-4 h-4 mr-2" />
               Copy Share Link
             </>
           )}
@@ -129,20 +140,12 @@ export function GameInfo({
       {/* Game Actions */}
       {status === 'active' && playerColor && (
         <>
-          <Separator className="bg-white/10" />
+          <Separator className="bg-border" />
           <div className="space-y-3">
-            <Button
-              onClick={onOfferDraw}
-              variant="outline"
-              className="w-full bg-blue-500/10 hover:bg-blue-500/20 border-blue-400/30 text-blue-200"
-            >
+            <Button onClick={onOfferDraw} variant="secondary" className="w-full">
               Offer Draw
             </Button>
-            <Button
-              onClick={onResign}
-              variant="destructive"
-              className="w-full bg-red-500/20 hover:bg-red-500/30 border-red-400/30"
-            >
+            <Button onClick={onResign} variant="destructive" className="w-full">
               Resign
             </Button>
           </div>
@@ -151,8 +154,8 @@ export function GameInfo({
 
       {/* Status Message */}
       {status === 'waiting' && (
-        <Alert className="bg-yellow-500/10 border-yellow-400/30">
-          <AlertDescription className="text-sm text-yellow-200/90">
+        <Alert className="bg-warning/10 border-warning/30" data-testid="game-status">
+          <AlertDescription className="text-sm text-warning-foreground">
             Share this link with your opponent to start the game!
           </AlertDescription>
         </Alert>

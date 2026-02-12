@@ -1,5 +1,6 @@
 import { useParams, useSearchParams } from 'react-router-dom';
 import { useChessGame } from '../hooks/useChessGame';
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { ChessBoard } from '../components/ChessBoard';
 import { GameInfo } from '../components/GameInfo';
 import { GameResult } from '../components/GameResult';
@@ -15,7 +16,7 @@ function Game() {
       <div className="flex items-center justify-center min-h-screen p-4">
         <div className="w-full max-w-md p-8 frosted-glass">
           <h1 className="mb-4 text-2xl font-bold text-center">Invalid Game Link</h1>
-          <p className="text-center text-white/80">
+          <p className="text-center text-muted-foreground">
             This game link is invalid. Please check the URL and try again.
           </p>
         </div>
@@ -39,13 +40,20 @@ function Game() {
     offerDraw,
   } = useChessGame({ gameId, token });
 
+  // Set document title based on player color
+  useDocumentTitle(
+    playerColor
+      ? `Chess - Playing as ${playerColor.charAt(0).toUpperCase() + playerColor.slice(1)}`
+      : 'Chess Game'
+  );
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen p-4">
         <div className="w-full max-w-md p-8 frosted-glass">
           <div className="text-center">
-            <div className="w-12 h-12 mx-auto mb-4 border-t-2 border-b-2 border-white rounded-full animate-spin"></div>
-            <p className="text-white/80">Loading game...</p>
+            <div className="w-12 h-12 mx-auto mb-4 border-t-2 border-b-2 rounded-full border-primary animate-spin"></div>
+            <p className="text-muted-foreground">Loading game...</p>
           </div>
         </div>
       </div>
@@ -59,8 +67,8 @@ function Game() {
 
         {/* Error Message */}
         {error && (
-          <Alert variant="destructive" className="mb-4 bg-red-500/20 border-red-400/30">
-            <AlertDescription className="text-sm text-red-200">{error}</AlertDescription>
+          <Alert variant="destructive" className="mb-4">
+            <AlertDescription className="text-sm">{error}</AlertDescription>
           </Alert>
         )}
 

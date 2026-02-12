@@ -48,15 +48,21 @@ function Home() {
 
         {!gameData ? (
           <div className="text-center">
-            <p className="text-white/80 mb-6">
+            <p className="text-muted-foreground mb-6">
               Create a new game and share the links with your opponent
             </p>
-            <Button onClick={createGame} disabled={loading} size="lg" className="w-auto mx-auto">
+            <Button
+              onClick={createGame}
+              disabled={loading}
+              size="lg"
+              className="w-auto mx-auto"
+              data-testid="create-game-button"
+            >
               {loading ? 'Creating Game...' : 'Create New Game'}
             </Button>
             {error && (
-              <Alert variant="destructive" className="mt-4 bg-red-500/20 border-red-500/30">
-                <AlertDescription className="text-red-300">{error}</AlertDescription>
+              <Alert variant="destructive" className="mt-4">
+                <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
           </div>
@@ -75,6 +81,7 @@ function Home() {
                     value={gameData.whiteUrl}
                     readOnly
                     className="flex-1 text-sm bg-white/10 border-white/30 text-white"
+                    data-testid="white-url"
                   />
                   <Button
                     onClick={() => copyToClipboard(gameData.whiteUrl)}
@@ -82,6 +89,7 @@ function Home() {
                     size="icon"
                     className="bg-white/20 hover:bg-white/30 border-white/30"
                     title="Copy to clipboard"
+                    data-testid="copy-white-link"
                   >
                     <Copy className="h-4 w-4" />
                   </Button>
@@ -96,6 +104,7 @@ function Home() {
                     value={gameData.blackUrl}
                     readOnly
                     className="flex-1 text-sm bg-white/10 border-white/30 text-white"
+                    data-testid="black-url"
                   />
                   <Button
                     onClick={() => copyToClipboard(gameData.blackUrl)}
@@ -103,6 +112,7 @@ function Home() {
                     size="icon"
                     className="bg-white/20 hover:bg-white/30 border-white/30"
                     title="Copy to clipboard"
+                    data-testid="copy-black-link"
                   >
                     <Copy className="h-4 w-4" />
                   </Button>

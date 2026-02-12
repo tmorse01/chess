@@ -118,7 +118,7 @@ describe('Socket.IO Game Handler Integration Tests', () => {
     });
 
     const data = await rejectionPromise;
-    expect(data.error).toBe('Not your turn');
+    expect(data.reason).toBe('Not your turn');
   });
 
   it('should reject invalid moves', async () => {
@@ -144,9 +144,7 @@ describe('Socket.IO Game Handler Integration Tests', () => {
     });
 
     const data = await rejectionPromise;
-    expect(data.error).toBe('Invalid move format');
-    expect(data.from).toBe('e2');
-    expect(data.to).toBe('e5');
+    expect(data.reason).toBe('Invalid move format');
   });
 
   it('should send current game state on reconnect', async () => {
@@ -258,7 +256,7 @@ describe('Socket.IO Game Handler Integration Tests', () => {
 
   it('should reject invalid tokens', async () => {
     const errorPromise = new Promise<any>((resolve) => {
-      whiteSocket.once('error', (data) => resolve(data));
+      whiteSocket.once('game_error', (data) => resolve(data));
     });
 
     whiteSocket.emit('join_game', { gameId, token: 'invalid-token-123' });

@@ -102,6 +102,20 @@ export function useChessGame({ gameId, token }: UseChessGameOptions): UseChessGa
       setIsLoading(false);
     });
 
+    // Listen for game end events
+    newSocket.on('game_ended', (data: { result: string; reason: string }) => {
+      console.log('[useChessGame] Game ended:', data);
+      setStatus('ended');
+      setResult(data.result as 'white_win' | 'black_win' | 'draw' | 'unknown');
+      setEndedReason(data.reason);
+    });
+
+    // Listen for draw offers
+    newSocket.on('draw_offered', (data: { offeredBy: 'w' | 'b' }) => {
+      console.log('[useChessGame] Draw offered by:', data.offeredBy);
+      // You could add a notification or state here to show the draw offer to the other player
+    });
+
     setSocket(newSocket);
 
     // Cleanup on unmount

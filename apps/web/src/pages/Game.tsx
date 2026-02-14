@@ -4,6 +4,7 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { ChessBoard } from '../components/ChessBoard';
 import { GameInfo } from '../components/GameInfo';
 import { GameResult } from '../components/GameResult';
+import { SkeletonLoader } from '../components/SkeletonLoader';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 function Game() {
@@ -32,7 +33,8 @@ function Game() {
     status,
     playerColor,
     isPlayerTurn,
-    isConnected,
+    connectionStatus,
+    lastMove,
     error,
     isLoading,
     makeMove,
@@ -49,20 +51,15 @@ function Game() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen p-4">
-        <div className="w-full max-w-md p-8 frosted-glass">
-          <div className="text-center">
-            <div className="w-12 h-12 mx-auto mb-4 border-t-2 border-b-2 rounded-full border-primary animate-spin"></div>
-            <p className="text-muted-foreground">Loading game...</p>
-          </div>
-        </div>
+      <div className="min-h-screen p-4 bg-gradient-to-br from-violet-50 via-white to-violet-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+        <SkeletonLoader />
       </div>
     );
   }
 
   return (
     <div className="flex items-center justify-center min-h-screen p-4">
-      <div className="w-full max-w-6xl p-6 frosted-glass lg:p-8">
+      <div className="w-full max-w-6xl p-6 lg:p-8 bg-slate-900/90 border border-violet-500/30 rounded-2xl shadow-xl shadow-violet-500/10">
         <h1 className="mb-6 text-3xl font-bold text-center lg:mb-8">Chess Game</h1>
 
         {/* Error Message */}
@@ -87,14 +84,15 @@ function Game() {
 
           {/* Game Info Sidebar - Takes 1 column on large screens */}
           <div className="lg:col-span-1">
-            <div className="h-full p-6 frosted-glass">
+            <div className="h-full p-6 bg-slate-900/90 border border-violet-500/30 rounded-2xl shadow-xl shadow-violet-500/10">
               <GameInfo
                 gameId={gameId}
                 playerColor={playerColor}
                 turn={turn}
                 isPlayerTurn={isPlayerTurn}
                 status={status}
-                isConnected={isConnected}
+                connectionStatus={connectionStatus}
+                lastMove={lastMove}
                 onResign={resign}
                 onOfferDraw={offerDraw}
               />

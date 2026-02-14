@@ -1,9 +1,18 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Copy, Check } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { ConnectionBadge } from './ConnectionBadge';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+
+interface MoveRow {
+  moveNumber: number;
+  white: string | null;
+  black: string | null;
+}
 
 interface GameInfoProps {
   gameId: string;
@@ -11,7 +20,8 @@ interface GameInfoProps {
   turn: 'w' | 'b';
   isPlayerTurn: boolean;
   status: 'waiting' | 'active' | 'ended';
-  isConnected: boolean;
+  connectionStatus: 'connected' | 'disconnected' | 'reconnecting';
+  lastMove?: { from: string; to: string; san: string } | null;
   onResign: () => void;
   onOfferDraw: () => void;
 }
@@ -22,11 +32,14 @@ export function GameInfo({
   turn,
   isPlayerTurn,
   status,
-  isConnected,
+  connectionStatus,
+  lastMove,
   onResign,
   onOfferDraw,
 }: GameInfoProps) {
   const [copied, setCopied] = useState(false);
+  const [moves, setMoves] = useState<MoveRow[]>([]);
+  const [movesLoading, setMovesLoading] = useState(true);
 
   const currentUrl = window.location.href;
 
@@ -36,16 +49,44 @@ export function GameInfo({
     turn,
     isPlayerTurn,
     status,
-    isConnected,
+    connectionStatus,
   });
+
+  // Fetch move history
+  useEffect(() => {
+    fetchMoves();
+  }, [gameId]);
+
+  // Re-fetch when a new move is made
+  useEffect(() => {
+    if (lastMove) {
+      fetchMoves();
+    }
+  }, [lastMove]);
+
+  const fetchMoves = async () => {
+    try {
+      const response = await fetch(`${API_URL}/games/${gameId}/moves`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch moves');
+      }
+      const data = await response.json();
+      setMoves(data);
+    } catch (err) {
+      console.error('Error fetching moves:', err);
+    } finally {
+      setMovesLoading(false);
+    }
+  };
 
   const copyShareLink = async () => {
     try {
       await navigator.clipboard.writeText(currentUrl);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      toast.success('Link copied to clipboard!');
     } catch (error) {
       console.error('Failed to copy link:', error);
+      toast.error('Failed to copy link. Please try again.');
     }
   };
 
@@ -67,17 +108,8 @@ export function GameInfo({
   return (
     <div className="space-y-6">
       {/* Connection Status */}
-      <div className="flex items-center gap-2">
-        <Badge
-          variant={isConnected ? 'default' : 'destructive'}
-          className="gap-2"
-          data-testid="connection-status"
-        >
-          <div
-            className={`w-2 h-2 rounded-full ${isConnected ? 'bg-success' : 'bg-destructive'}`}
-          />
-          {isConnected ? 'Connected' : 'Disconnected'}
-        </Badge>
+      <div className="flex justify-end">
+        <ConnectionBadge status={connectionStatus} data-testid="connection-status" />
       </div>
 
       {/* Game ID */}
@@ -141,11 +173,19 @@ export function GameInfo({
       {status === 'active' && playerColor && (
         <>
           <Separator className="bg-border" />
-          <div className="space-y-3">
-            <Button onClick={onOfferDraw} variant="secondary" className="w-full">
+          <div className="flex flex-col gap-2">
+            <Button
+              onClick={onOfferDraw}
+              variant="secondary"
+              className="w-full min-h-12 touch-manipulation"
+            >
               Offer Draw
             </Button>
-            <Button onClick={onResign} variant="destructive" className="w-full">
+            <Button
+              onClick={onResign}
+              variant="destructive"
+              className="w-full min-h-12 touch-manipulation"
+            >
               Resign
             </Button>
           </div>
@@ -159,6 +199,44 @@ export function GameInfo({
             Share this link with your opponent to start the game!
           </AlertDescription>
         </Alert>
+      )}
+
+      {/* Move History */}
+      {status !== 'waiting' && (
+        <>
+          <Separator className="bg-border" />
+          <div className="space-y-2">
+            <h2 className="text-sm font-semibold text-muted-foreground">Move History</h2>
+            {movesLoading ? (
+              <div className="flex items-center justify-center py-4">
+                <p className="text-sm text-muted-foreground">Loading moves...</p>
+              </div>
+            ) : moves.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-2">No moves yet</p>
+            ) : (
+              <div className="max-h-[200px] overflow-y-auto rounded border border-border/50 bg-black/20">
+                <div className="p-2 space-y-1">
+                  {moves.map((move, index) => (
+                    <div
+                      key={move.moveNumber}
+                      className={`flex items-center gap-3 p-1.5 rounded text-sm font-mono ${
+                        index === moves.length - 1
+                          ? 'bg-violet-500/20 border border-violet-500/30'
+                          : 'hover:bg-white/5'
+                      }`}
+                    >
+                      <span className="w-6 text-right text-muted-foreground text-xs">
+                        {move.moveNumber}.
+                      </span>
+                      <span className="flex-1 text-white">{move.white || '...'}</span>
+                      <span className="flex-1 text-white/90">{move.black || '...'}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </>
       )}
     </div>
   );

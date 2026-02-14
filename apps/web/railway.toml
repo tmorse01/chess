@@ -1,0 +1,10 @@
+[build]
+builder = "NIXPACKS"
+buildCommand = "cd ../.. && pnpm install && pnpm -F @chess-app/shared build && pnpm -F web build"
+
+[deploy]
+# Railway will automatically serve static files from the build output directory
+staticPublishPath = "dist"
+
+[nixpacks]
+nixPkgs = ["nodejs-20_x", "pnpm"]

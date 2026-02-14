@@ -57,7 +57,7 @@ export function ChessBoard({ fen, playerColor, isPlayerTurn, status, onMove }: C
   };
 
   return (
-    <div className="w-full max-w-2xl">
+    <div className="w-full max-w-[min(90vw,600px)] touch-none">
       <Chessboard
         position={fen}
         onPieceDrop={onDrop}
@@ -67,6 +67,7 @@ export function ChessBoard({ fen, playerColor, isPlayerTurn, status, onMove }: C
         customDarkSquareStyle={customDarkSquareStyle}
         customLightSquareStyle={customLightSquareStyle}
         animationDuration={200}
+        snapToCursor={true}
       />
     </div>
   );

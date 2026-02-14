@@ -37,7 +37,7 @@
   /* Chart colors with violet tint */
   --color-chart-1: oklch(61% 0.154 285);
   --color-chart-2: oklch(55% 0.12 310);
-  --color-chart-3: oklch(50% 0.10 265);
+  --color-chart-3: oklch(50% 0.1 265);
   --color-chart-4: oklch(66% 0.127 290);
   --color-chart-5: oklch(60% 0.14 275);
 
@@ -105,6 +105,8 @@
     @apply border border-border;
     @apply rounded-2xl;
     @apply shadow-2xl;
+    /* iOS Safari backdrop-filter support */
+    -webkit-backdrop-filter: blur(12px);
   }
 
   .button-primary {
@@ -141,5 +143,20 @@
     @apply focus:ring-2;
     @apply focus:ring-ring;
     @apply transition-all;
+  }
+
+  /* Accessible focus styles - visible only for keyboard navigation */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-violet-500 ring-offset-2 ring-offset-background;
+  }
+
+  /* Touch optimization */
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+
+  /* kbd element styling for keyboard shortcuts */
+  kbd {
+    @apply inline-block px-2 py-1 text-xs font-mono bg-muted border border-border rounded shadow-sm;
   }
 }

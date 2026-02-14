@@ -289,6 +289,48 @@ chess/
 - Change PORT in `apps/api/.env`
 - Update VITE_API_URL in `apps/web/.env` to match
 
+## 🚂 Deployment
+
+The app is configured for deployment on [Railway](https://railway.app) with automatic CI/CD via GitHub Actions.
+
+### Quick Deploy to Railway
+
+1. **Create Railway Project**
+
+   ```bash
+   railway login
+   railway init
+   ```
+
+2. **Add PostgreSQL Database**
+   - In Railway dashboard: New → Database → PostgreSQL
+   - `DATABASE_URL` will be auto-provided
+
+3. **Deploy API Service**
+
+   ```bash
+   cd apps/api
+   railway up
+   # Set environment variables:
+   railway variables set CORS_ORIGIN=https://your-web-url.railway.app
+   railway variables set NODE_ENV=production
+   ```
+
+4. **Deploy Web Service**
+   ```bash
+   cd apps/web
+   railway variables set VITE_API_URL=https://your-api-url.railway.app
+   railway up
+   ```
+
+### Automated Deployment
+
+- **CI/CD Pipeline**: Configured via GitHub Actions
+- **Test Workflow**: Runs on all pushes and PRs
+- **Deploy Workflow**: Auto-deploys to Railway on push to `main`
+
+See [infra/railway/README.md](./infra/railway/README.md) for complete deployment documentation.
+
 ## 🚧 Current Status
 
 ### ✅ Completed Phases
@@ -299,14 +341,20 @@ chess/
 - **Phase 4:** Chess Logic Layer
 - **Phase 5:** Socket.IO Real-Time Layer
 - **Phase 6:** Frontend Foundation
-- **Phase 7:** Interactive Chess Board ⭐ (Current)
-
-### 🔜 Upcoming Phases
-
+- **Phase 7:** Interactive Chess Board
 - **Phase 8:** Game End States
 - **Phase 9:** E2E Testing with Playwright
 - **Phase 10:** Polish & Error Handling
-- **Phase 11:** Railway Deployment
+- **Phase 11:** Railway Deployment ⭐ (Current)
+
+### 🎉 Project Complete!
+
+All planned phases have been implemented. The chess app is fully functional with:
+
+- Real-time multiplayer gameplay
+- Comprehensive test coverage
+- Production deployment configuration
+- CI/CD pipeline
 
 ## 📚 Documentation
 

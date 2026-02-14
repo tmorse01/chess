@@ -1,6 +1,9 @@
 import { useEffect, useState, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
+import { toast } from 'sonner';
 import type { GameStateUpdate } from '@chess-app/shared';
+import { useGamePersistence } from './useGamePersistence';
+import { getUserMessage, getErrorDisplayType } from '../lib/errorMessages';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
@@ -18,7 +21,7 @@ interface UseChessGameReturn {
   playerColor: 'white' | 'black' | null;
   isPlayerTurn: boolean;
   lastMove: { from: string; to: string; san: string } | null;
-  isConnected: boolean;
+  connectionStatus: 'connected' | 'disconnected' | 'reconnecting';
   error: string | null;
   isLoading: boolean;
   makeMove: (from: string, to: string, promotion?: string) => void;
@@ -36,9 +39,41 @@ export function useChessGame({ gameId, token }: UseChessGameOptions): UseChessGa
   const [endedReason, setEndedReason] = useState<string | null>(null);
   const [playerColor, setPlayerColor] = useState<'white' | 'black' | null>(null);
   const [lastMove, setLastMove] = useState<{ from: string; to: string; san: string } | null>(null);
-  const [isConnected, setIsConnected] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState<
+    'connected' | 'disconnected' | 'reconnecting'
+  >('disconnected');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Persist game to localStorage for dev experience (survive restarts)
+  useGamePersistence(gameId, token, playerColor || undefined);
+
+  // Fetch game state from REST API (fallback/recovery)
+  const fetchGameState = useCallback(async () => {
+    try {
+      console.log('[useChessGame] Fetching game state from REST API');
+      const response = await fetch(`${API_URL}/games/${gameId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch game state');
+      }
+      const data = await response.json();
+
+      // Update state with fetched data
+      setFen(data.fen);
+      setTurn(data.turn);
+      setStatus(data.status);
+      setResult(data.result);
+      setEndedReason(data.endedReason);
+      setLastMove(data.lastMove || null);
+      setIsLoading(false);
+      setError(null);
+    } catch (err) {
+      console.error('[useChessGame] Failed to fetch game state:', err);
+      const friendlyMessage = getUserMessage('FETCH_GAME_ERROR');
+      setError(friendlyMessage);
+      toast.error(friendlyMessage);
+    }
+  }, [gameId]);
 
   // Connect to socket and join game
   useEffect(() => {
@@ -51,20 +86,28 @@ export function useChessGame({ gameId, token }: UseChessGameOptions): UseChessGa
 
     newSocket.on('connect', () => {
       console.log('[useChessGame] Socket connected, ID:', newSocket.id);
-      setIsConnected(true);
+      setConnectionStatus('connected');
       setError(null);
 
-      // Join the game room
+      // Join the game room (works for both initial connection and reconnection)
       newSocket.emit('join_game', { gameId, token });
+
+      // On reconnection, fetch latest state from REST API as backup
+      if (!isLoading) {
+        fetchGameState();
+      }
     });
 
     newSocket.on('disconnect', (reason) => {
       console.log('[useChessGame] Socket disconnected. Reason:', reason);
-      setIsConnected(false);
+      setConnectionStatus('reconnecting');
+      toast.info('Connection lost. Reconnecting...');
     });
 
-    newSocket.on('connect_error', (err) => {
-      setError(`Connection error: ${err.message}`);
+    newSocket.on('connect_error', () => {
+      const friendlyMessage = getUserMessage('CONNECTION_ERROR');
+      setError(friendlyMessage);
+      toast.error(friendlyMessage);
       setIsLoading(false);
     });
 
@@ -90,15 +133,24 @@ export function useChessGame({ gameId, token }: UseChessGameOptions): UseChessGa
     // Listen for move rejection
     newSocket.on('move_rejected', (data: { reason: string }) => {
       console.log('[useChessGame] Move rejected:', data.reason);
-      setError(data.reason);
+      const friendlyMessage = getUserMessage(data.reason);
+      toast.error(friendlyMessage);
+      // Don't set error state for move rejections - they're temporary
       // Clear error after 3 seconds
       setTimeout(() => setError(null), 3000);
     });
 
     // Listen for game errors
-    newSocket.on('game_error', (data: { message: string }) => {
+    newSocket.on('error', (data: { message: string }) => {
       console.log('[useChessGame] Game error:', data.message);
-      setError(data.message);
+      const friendlyMessage = getUserMessage(data.message);
+      const displayType = getErrorDisplayType(data.message);
+
+      if (displayType === 'toast') {
+        toast.error(friendlyMessage);
+      } else {
+        setError(friendlyMessage);
+      }
       setIsLoading(false);
     });
 
@@ -127,24 +179,22 @@ export function useChessGame({ gameId, token }: UseChessGameOptions): UseChessGa
   // Make a move
   const makeMove = useCallback(
     (from: string, to: string, promotion?: string) => {
-      console.log('[useChessGame] makeMove called:', {
+      console.log('[useChessGame] makeMove called with:', {
         from,
         to,
         promotion,
-        isConnected,
         socketConnected: socket?.connected,
+        connectionStatus,
         status,
         playerColor,
       });
 
-      if (!socket || !isConnected) {
+      if (!socket || connectionStatus !== 'connected') {
         console.log(
           '[useChessGame] Cannot make move: not connected. Socket:',
           !!socket,
-          'isConnected:',
-          isConnected,
-          'socket.connected:',
-          socket?.connected
+          'connectionStatus:',
+          connectionStatus
         );
         setError('Not connected to server');
         return;
@@ -165,38 +215,38 @@ export function useChessGame({ gameId, token }: UseChessGameOptions): UseChessGa
         promotion,
       });
     },
-    [socket, isConnected, status, gameId, token]
+    [socket, connectionStatus, status, gameId, token]
   );
 
   // Resign from the game
   const resign = useCallback(() => {
-    if (!socket || !isConnected) {
+    if (!socket || connectionStatus !== 'connected') {
       setError('Not connected to server');
       return;
     }
 
     socket.emit('resign', { gameId, token });
-  }, [socket, isConnected, gameId, token]);
+  }, [socket, connectionStatus, gameId, token]);
 
   // Offer a draw
   const offerDraw = useCallback(() => {
-    if (!socket || !isConnected) {
+    if (!socket || connectionStatus !== 'connected') {
       setError('Not connected to server');
       return;
     }
 
     socket.emit('offer_draw', { gameId, token });
-  }, [socket, isConnected, gameId, token]);
+  }, [socket, connectionStatus, gameId, token]);
 
   // Accept a draw offer
   const acceptDraw = useCallback(() => {
-    if (!socket || !isConnected) {
+    if (!socket || connectionStatus !== 'connected') {
       setError('Not connected to server');
       return;
     }
 
     socket.emit('accept_draw', { gameId, token });
-  }, [socket, isConnected, gameId, token]);
+  }, [socket, connectionStatus, gameId, token]);
 
   const isPlayerTurn = playerColor === 'white' ? turn === 'w' : turn === 'b';
 
@@ -205,7 +255,7 @@ export function useChessGame({ gameId, token }: UseChessGameOptions): UseChessGa
     turn,
     isPlayerTurn,
     status,
-    isConnected,
+    connectionStatus,
     isLoading,
   });
 
@@ -218,7 +268,7 @@ export function useChessGame({ gameId, token }: UseChessGameOptions): UseChessGa
     playerColor,
     isPlayerTurn,
     lastMove,
-    isConnected,
+    connectionStatus,
     error,
     isLoading,
     makeMove,

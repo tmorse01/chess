@@ -1,0 +1,76 @@
+name: Deploy to Railway
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Run Tests Before Deploy
+    uses: ./.github/workflows/test.yml
+
+  deploy:
+    name: Deploy to Railway
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy API Service
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          cd apps/api
+          railway up --service ${{ secrets.RAILWAY_API_SERVICE_ID }} --detach
+
+      - name: Wait for API health check
+        env:
+          API_URL: ${{ secrets.RAILWAY_API_URL }}
+        run: |
+          echo "Waiting for API to be healthy..."
+          for i in {1..30}; do
+            if curl -f -s "${API_URL}/health" > /dev/null; then
+              echo "API is healthy!"
+              exit 0
+            fi
+            echo "Attempt $i/30 failed, retrying in 10s..."
+            sleep 10
+          done
+          echo "API health check failed after 5 minutes"
+          exit 1
+
+      - name: Deploy Web Service
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          cd apps/web
+          railway up --service ${{ secrets.RAILWAY_WEB_SERVICE_ID }} --detach
+
+      - name: Verify Web Deployment
+        env:
+          WEB_URL: ${{ secrets.RAILWAY_WEB_URL }}
+        run: |
+          echo "Waiting for web app to be accessible..."
+          sleep 30
+          if curl -f -s "${WEB_URL}" > /dev/null; then
+            echo "Web app is accessible!"
+          else
+            echo "Warning: Web app may not be accessible yet"
+            exit 1
+          fi
+
+      - name: Deployment Summary
+        run: |
+          echo "### ✅ Deployment Successful" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**API Service:** ${{ secrets.RAILWAY_API_URL }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Web Service:** ${{ secrets.RAILWAY_WEB_URL }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Deployed at: $(date -u)" >> $GITHUB_STEP_SUMMARY

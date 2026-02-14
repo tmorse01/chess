@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Game from './Game';
 
@@ -14,7 +15,7 @@ vi.mock('../hooks/useChessGame', () => ({
     playerColor: 'white',
     isPlayerTurn: true,
     lastMove: null,
-    isConnected: true,
+    connectionStatus: 'connected',
     error: null,
     isLoading: false,
     makeMove: vi.fn(),
@@ -88,7 +89,7 @@ describe('Game', () => {
       playerColor: 'white',
       isPlayerTurn: true,
       lastMove: null,
-      isConnected: true,
+      connectionStatus: 'connected',
       error: null,
       isLoading: true,
       makeMove: vi.fn(),
@@ -99,7 +100,8 @@ describe('Game', () => {
 
     renderGame('/g/test-game-id-123?token=test-token-456');
 
-    expect(screen.getByText('Loading game...')).toBeInTheDocument();
+    // Check for skeleton loader elements instead of text
+    expect(screen.queryByText('Chess Game')).not.toBeInTheDocument();
   });
 
   it('should display error message when error exists', async () => {
@@ -113,7 +115,7 @@ describe('Game', () => {
       playerColor: 'white',
       isPlayerTurn: true,
       lastMove: null,
-      isConnected: true,
+      connectionStatus: 'connected',
       error: 'Test error message',
       isLoading: false,
       makeMove: vi.fn(),

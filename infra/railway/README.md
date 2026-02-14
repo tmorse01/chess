@@ -8,11 +8,36 @@ This guide explains how to deploy the Chess App to Railway with automatic CI/CD 
 - **Web Service**: Static site built with Vite (apps/web/)
 - **Database**: Railway Postgres plugin
 
-## Prerequisites
+## Deployment Methods
+
+Choose your preferred method:
+
+### 🎯 **[Recommended] GitHub UI Import**
+**Best for**: Most users, automatic deployments on push
+
+See **[GITHUB_UI_DEPLOYMENT.md](./GITHUB_UI_DEPLOYMENT.md)** for step-by-step instructions.
+
+- ✅ Easiest setup (click through UI)
+- ✅ Automatic deployments on git push
+- ✅ Visual service management
+- ✅ No CLI needed
+
+### 🔧 **Railway CLI Deployment**
+**Best for**: Automation, scripting, CI/CD pipelines
+
+See below for Railway CLI instructions.
+
+- ✅ Direct deployment from command line
+- ✅ Scriptable/automatable
+- ⚠️ Requires CLI installation
+
+---
+
+## Prerequisites (CLI Method)
 
 1. [Railway account](https://railway.app) (free tier available)
 2. Railway CLI installed: `npm install -g @railway/cli`
-3. GitHub repository with the chess app code
+3. GitHub repository with the chess app code (for auto-deploy)
 4. Railway project created (or create during this process)
 
 ## Initial Deployment

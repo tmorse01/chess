@@ -6,7 +6,7 @@
     "jsx": "react-jsx",
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "types": ["vite/client"],
+    "types": ["vite/client", "@testing-library/jest-dom"],
     "outDir": "./dist",
     "rootDir": "./src",
     "baseUrl": ".",

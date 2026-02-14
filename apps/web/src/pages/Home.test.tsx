@@ -84,7 +84,7 @@ describe('Home', () => {
     expect(screen.getByText('White Player Link')).toBeInTheDocument();
     expect(screen.getByText('Black Player Link')).toBeInTheDocument();
 
-    const inputs = screen.getAllByRole('textbox');
+    const inputs = screen.getAllByRole('textbox') as HTMLInputElement[];
     expect(inputs).toHaveLength(2);
     expect(inputs[0].value).toBe(mockGameData.whiteUrl);
     expect(inputs[1].value).toBe(mockGameData.blackUrl);

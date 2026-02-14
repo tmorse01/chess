@@ -48,24 +48,15 @@ describe('ErrorBoundary', () => {
   });
 
   it('shows error message in dev mode', () => {
-    const originalEnv = import.meta.env.DEV;
-    Object.defineProperty(import.meta.env, 'DEV', {
-      value: true,
-      configurable: true,
-    });
-
+    // Note: Tests run in dev mode by default, so we don't need to mock the environment
     render(
       <ErrorBoundary>
         <ThrowError shouldThrow={true} />
       </ErrorBoundary>
     );
 
+    // In dev mode, the error message should be visible
     expect(screen.getByText('Test error message')).toBeInTheDocument();
-
-    Object.defineProperty(import.meta.env, 'DEV', {
-      value: originalEnv,
-      configurable: true,
-    });
   });
 
   it('displays Try Again and Return Home buttons', () => {
@@ -80,29 +71,47 @@ describe('ErrorBoundary', () => {
   });
 
   it('resets error state when Try Again is clicked', () => {
-    const { rerender } = render(
+    let shouldThrow = true;
+    const ThrowErrorDynamic = () => {
+      if (shouldThrow) {
+        throw new Error('Test error message');
+      }
+      return <div>Normal content</div>;
+    };
+
+    render(
       <ErrorBoundary>
-        <ThrowError shouldThrow={true} />
+        <ThrowErrorDynamic />
       </ErrorBoundary>
     );
+
+    // Component threw, error UI is showing
+    expect(screen.getByText('Try Again')).toBeInTheDocument();
+
+    // Change behavior to not throw
+    shouldThrow = false;
 
     const tryAgainButton = screen.getByText('Try Again');
     fireEvent.click(tryAgainButton);
 
-    // After reset, re-render with non-throwing component
-    rerender(
-      <ErrorBoundary>
-        <ThrowError shouldThrow={false} />
-      </ErrorBoundary>
-    );
-
+    // After reset, component should render normally
     expect(screen.getByText('Normal content')).toBeInTheDocument();
   });
 
   it('navigates to home when Return Home is clicked', () => {
     const originalLocation = window.location;
+    const hrefSetter = vi.fn();
     delete (window as any).location;
-    window.location = { ...originalLocation, href: '' } as Location;
+    // @ts-expect-error - Mocking window.location for test purposes
+    window.location = {
+      ...originalLocation,
+      set href(value: string) {
+        hrefSetter(value);
+      },
+      get href() {
+        return hrefSetter.mock.lastCall?.[0] || '';
+      },
+    };
 
     render(
       <ErrorBoundary>
@@ -113,8 +122,9 @@ describe('ErrorBoundary', () => {
     const returnHomeButton = screen.getByText('Return Home');
     fireEvent.click(returnHomeButton);
 
-    expect(window.location.href).toBe('/');
+    expect(hrefSetter).toHaveBeenCalledWith('/');
 
+    // @ts-expect-error - Restoring original window.location
     window.location = originalLocation;
   });
 });

@@ -138,10 +138,12 @@ cd apps/web && pnpm preview
 
 ## 📚 Documentation Quick Links
 
-- **[Railway Deployment Guide](infra/railway/README.md)** - Complete deployment documentation
-- **[GitHub Actions Setup](.github/GITHUB_ACTIONS_SETUP.md)** - CI/CD configuration guide
-- **[Phase 11 Complete](docs/PHASE_11_COMPLETE.md)** - Detailed implementation notes
-- **[Main README](README.md)** - Project overview with deployment section
+- **[GitHub UI Deployment](GITHUB_UI_DEPLOYMENT.md)** - Step-by-step UI import guide ⭐
+- **[Railway CLI Deployment](README.md)** - CLI deployment instructions
+- **[Monorepo Setup](MONOREPO_SETUP.md)** - Understanding the monorepo configuration
+- **[GitHub Actions Setup](../.github/GITHUB_ACTIONS_SETUP.md)** - CI/CD configuration guide
+- **[Phase 11 Complete](../docs/PHASE_11_COMPLETE.md)** - Detailed implementation notes
+- **[Main README](../README.md)** - Project overview with deployment section
 
 ## 🎉 Success Criteria
 

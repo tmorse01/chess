@@ -12,7 +12,7 @@ describe('GameInfo', () => {
     turn: 'w' as const,
     isPlayerTurn: true,
     status: 'active' as const,
-    isConnected: true,
+    connectionStatus: 'connected' as const,
     onResign: mockOnResign,
     onOfferDraw: mockOnOfferDraw,
   };
@@ -34,9 +34,9 @@ describe('GameInfo', () => {
   });
 
   it('should show disconnected status', () => {
-    render(<GameInfo {...defaultProps} isConnected={false} />);
+    render(<GameInfo {...defaultProps} connectionStatus="disconnected" />);
 
-    expect(screen.getByText('Disconnected')).toBeDefined();
+    expect(screen.getByText('Offline')).toBeDefined();
   });
 
   it('should show waiting message when game is waiting', () => {

@@ -291,45 +291,44 @@ chess/
 
 ## 🚂 Deployment
 
-The app is configured for deployment on [Railway](https://railway.app) with automatic CI/CD via GitHub Actions.
+The app is configured for deployment on [Railway](https://railway.app) with automatic deployments from GitHub.
 
 ### Quick Deploy to Railway
 
-1. **Create Railway Project**
+**Method 1: GitHub UI Import (Recommended)** ⭐
 
-   ```bash
-   railway login
-   railway init
-   ```
+1. Log in to Railway → "New Project" → "Deploy from GitHub repo"
+2. Select your chess app repository
+3. Add PostgreSQL database
+4. Manually add API service (Root: `apps/api`)
+5. Manually add Web service (Root: `apps/web`)
+6. Configure environment variables for each service
+7. Railway auto-deploys on push to GitHub
 
-2. **Add PostgreSQL Database**
-   - In Railway dashboard: New → Database → PostgreSQL
-   - `DATABASE_URL` will be auto-provided
+See **[infra/railway/GITHUB_UI_DEPLOYMENT.md](./infra/railway/GITHUB_UI_DEPLOYMENT.md)** for detailed step-by-step instructions.
 
-3. **Deploy API Service**
+**Method 2: Railway CLI**
 
-   ```bash
-   cd apps/api
-   railway up
-   # Set environment variables:
-   railway variables set CORS_ORIGIN=https://your-web-url.railway.app
-   railway variables set NODE_ENV=production
-   ```
+```bash
+railway login
+railway init
+# Add Postgres via dashboard
+cd apps/api && railway up
+cd apps/web && railway up
+```
 
-4. **Deploy Web Service**
-   ```bash
-   cd apps/web
-   railway variables set VITE_API_URL=https://your-api-url.railway.app
-   railway up
-   ```
+See [infra/railway/README.md](./infra/railway/README.md) for CLI deployment guide.
 
-### Automated Deployment
+### Automatic Deployments
 
-- **CI/CD Pipeline**: Configured via GitHub Actions
-- **Test Workflow**: Runs on all pushes and PRs
-- **Deploy Workflow**: Auto-deploys to Railway on push to `main`
+Once set up via GitHub import, Railway automatically deploys when you push to your repository. No manual intervention needed!
 
-See [infra/railway/README.md](./infra/railway/README.md) for complete deployment documentation.
+### Documentation
+
+- **[GitHub UI Deployment Guide](./infra/railway/GITHUB_UI_DEPLOYMENT.md)** - Step-by-step UI import (recommended)
+- **[Railway CLI Guide](./infra/railway/README.md)** - CLI deployment instructions
+- **[Monorepo Configuration](./infra/railway/MONOREPO_SETUP.md)** - Understanding the setup
+- **[GitHub Actions CI/CD](./infra/railway/README.md#github-actions-cicd)** - Automated testing & deployment
 
 ## 🚧 Current Status
 

@@ -37,7 +37,7 @@ describe('useGamePersistence', () => {
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       // Mock localStorage.setItem to throw error
-      vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      const setItemSpy = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
         throw new Error('Storage full');
       });
 
@@ -49,6 +49,7 @@ describe('useGamePersistence', () => {
 
       expect(consoleErrorSpy).toHaveBeenCalled();
       consoleErrorSpy.mockRestore();
+      setItemSpy.mockRestore();
     });
   });
 
@@ -113,7 +114,7 @@ describe('useGamePersistence', () => {
     it('handles errors gracefully', () => {
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-      vi.spyOn(Storage.prototype, 'removeItem').mockImplementation(() => {
+      const removeItemSpy = vi.spyOn(Storage.prototype, 'removeItem').mockImplementation(() => {
         throw new Error('Storage error');
       });
 
@@ -121,6 +122,7 @@ describe('useGamePersistence', () => {
 
       expect(consoleErrorSpy).toHaveBeenCalled();
       consoleErrorSpy.mockRestore();
+      removeItemSpy.mockRestore();
     });
   });
 

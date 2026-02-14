@@ -25,6 +25,7 @@ export function ConnectionBadge({ status, className }: ConnectionBadgeProps) {
           animate: true,
         };
       case 'disconnected':
+      default:
         return {
           icon: WifiOff,
           color: 'text-red-500',

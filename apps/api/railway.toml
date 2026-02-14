@@ -3,13 +3,11 @@ builder = "NIXPACKS"
 buildCommand = "cd ../.. && pnpm install && pnpm -F @chess-app/shared build && pnpm -F api build && pnpm -F api db:migrate"
 
 [deploy]
+startCommand = "cd ../.. && pnpm -F api start"
 healthcheckPath = "/health"
 healthcheckTimeout = 100
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10
-
-[start]
-cmd = "cd ../.. && pnpm -F api start"
 
 [nixpacks]
 nixPkgs = ["nodejs-20_x", "pnpm"]

@@ -37,9 +37,12 @@ cmds = [
   "echo 'PATH:' $PATH",
   "pnpm --filter @chess-app/shared build",
   "pnpm --filter @chess-app/web build",
-  "pnpm --filter @chess-app/api build"
+  "pnpm --filter @chess-app/api build",
+  "echo '=== Build completed successfully ==='",
+  "ls -la apps/web/dist || echo 'Web dist not found'",
+  "ls -la apps/api/dist || echo 'API dist not found'"
 ]
-env = { CI = "true" }
+env = { CI = "true", NODE_ENV = "production" }
 
 [start]
 cmd = "pnpm --filter @chess-app/api run db:migrate && pnpm --filter @chess-app/api start"

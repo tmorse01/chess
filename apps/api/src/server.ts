@@ -3,16 +3,22 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { gamesRouter } from './routes/games.js';
 import { setupGameHandlers } from './sockets/game-handler.js';
 
 // Load environment variables
 dotenv.config();
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const app: Express = express();
 const httpServer = createServer(app);
 const PORT = process.env.PORT || 3001;
 const CORS_ORIGIN = process.env.CORS_ORIGIN || 'http://localhost:5173';
+const NODE_ENV = process.env.NODE_ENV || 'development';
 
 // Initialize Socket.IO
 const io = new Server(httpServer, {
@@ -34,13 +40,26 @@ app.get('/health', (_req: Request, res: Response) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Routes
-app.use('/games', gamesRouter);
+// API Routes - mount under /api prefix
+app.use('/api/games', gamesRouter);
 
-// 404 handler
-app.use((_req: Request, res: Response) => {
-  res.status(404).json({ error: 'Not found' });
-});
+// Serve static files from web app in production
+if (NODE_ENV === 'production') {
+  const webDistPath = path.resolve(__dirname, '../../../web/dist');
+
+  // Serve static assets
+  app.use(express.static(webDistPath));
+
+  // SPA fallback - serve index.html for all other routes
+  app.get('*', (_req: Request, res: Response) => {
+    res.sendFile(path.join(webDistPath, 'index.html'));
+  });
+} else {
+  // 404 handler for development (API-only mode)
+  app.use((_req: Request, res: Response) => {
+    res.status(404).json({ error: 'Not found' });
+  });
+}
 
 // Error handling middleware
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {

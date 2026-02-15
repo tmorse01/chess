@@ -1,0 +1,46 @@
+# Railway auto-detects Node.js from package.json engines.node
+# We install pnpm via npm and ensure it's in PATH
+
+[phases.setup]
+cmds = [
+  "echo '=== DEBUG: Setup Phase ==='",
+  "echo 'PATH:' $PATH",
+  "echo 'Which node:' $(which node || echo 'NOT FOUND')",
+  "echo 'Node version:' $(node --version || echo 'FAILED')",
+  "echo 'Which npm:' $(which npm || echo 'NOT FOUND')",
+  "echo 'NPM version:' $(npm --version || echo 'FAILED')",
+  "echo 'NPM prefix:' $(npm config get prefix)",
+  "echo 'NPM global bin:' $(npm bin -g)",
+  "echo 'Installing pnpm via npm...'",
+  "npm install -g pnpm@8.7.6",
+  "echo '=== After pnpm install ==='",
+  "echo 'PATH:' $PATH",
+  "echo 'Which pnpm:' $(which pnpm || echo 'NOT FOUND')",
+  "echo 'PNPM version:' $(pnpm --version || echo 'FAILED')"
+]
+env = { CI = "true" }
+
+[phases.install]
+cmds = [
+  "echo '=== DEBUG: Install Phase ==='",
+  "echo 'PATH:' $PATH",
+  "echo 'Which node:' $(which node || echo 'NOT FOUND')",
+  "echo 'Which pnpm:' $(which pnpm || echo 'NOT FOUND')",
+  "echo 'Node version:' $(node --version || echo 'FAILED')",
+  "pnpm install --frozen-lockfile"
+]
+env = { CI = "true" }
+
+[phases.build]
+cmds = [
+  "echo '=== DEBUG: Build Phase ==='",
+  "echo 'PATH:' $PATH",
+  "pnpm --filter @chess-app/shared build",
+  "pnpm --filter @chess-app/web build",
+  "pnpm --filter @chess-app/api run db:migrate",
+  "pnpm --filter @chess-app/api build"
+]
+env = { CI = "true" }
+
+[start]
+cmd = "pnpm --filter @chess-app/api start"

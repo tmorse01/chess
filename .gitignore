@@ -40,9 +40,6 @@ pnpm-debug.log*
 .tmp/
 *.tsbuildinfo
 
-# Drizzle
-apps/api/drizzle/*.sql
-
 # Test results
 test-results/
 playwright-report/

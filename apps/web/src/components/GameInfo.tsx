@@ -5,10 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ConnectionBadge } from './ConnectionBadge';
-
-// In production, API is at /api on same domain. In dev, use separate API server.
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
-const API_BASE = import.meta.env.PROD ? '/api' : API_URL;
+import { api } from '@/lib/api-client';
 
 interface MoveRow {
   moveNumber: number;
@@ -68,11 +65,7 @@ export function GameInfo({
 
   const fetchMoves = async () => {
     try {
-      const response = await fetch(`${API_BASE}/games/${gameId}/moves`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch moves');
-      }
-      const data = await response.json();
+      const data = await api.games.getMoves(gameId);
       setMoves(data);
     } catch (err) {
       console.error('Error fetching moves:', err);

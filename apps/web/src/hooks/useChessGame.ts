@@ -4,11 +4,7 @@ import { toast } from 'sonner';
 import type { GameStateUpdate } from '@chess-app/shared';
 import { useGamePersistence } from './useGamePersistence';
 import { getUserMessage, getErrorDisplayType } from '../lib/errorMessages';
-
-// In production, API is at /api on same domain. In dev, use separate API server.
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
-const API_BASE = import.meta.env.PROD ? '/api' : API_URL;
-const SOCKET_URL = import.meta.env.PROD ? window.location.origin : API_URL;
+import { api, getSocketUrl } from '@/lib/api-client';
 
 interface UseChessGameOptions {
   gameId: string;
@@ -55,11 +51,7 @@ export function useChessGame({ gameId, token }: UseChessGameOptions): UseChessGa
   const fetchGameState = useCallback(async () => {
     try {
       console.log('[useChessGame] Fetching game state from REST API');
-      const response = await fetch(`${API_BASE}/games/${gameId}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch game state');
-      }
-      const data = await response.json();
+      const data = await api.games.getById(gameId);
 
       // Update state with fetched data
       setFen(data.fen);
@@ -80,10 +72,11 @@ export function useChessGame({ gameId, token }: UseChessGameOptions): UseChessGa
 
   // Connect to socket and join game
   useEffect(() => {
-    console.log('[useChessGame] Initializing socket connection to:', SOCKET_URL);
+    const socketUrl = getSocketUrl();
+    console.log('[useChessGame] Initializing socket connection to:', socketUrl);
     console.log('[useChessGame] GameId:', gameId, 'Token:', token?.substring(0, 8) + '...');
 
-    const newSocket = io(SOCKET_URL, {
+    const newSocket = io(socketUrl, {
       transports: ['websocket', 'polling'],
     });
 

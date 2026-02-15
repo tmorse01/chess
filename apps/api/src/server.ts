@@ -45,7 +45,7 @@ app.use('/api/games', gamesRouter);
 
 // Serve static files from web app in production
 if (NODE_ENV === 'production') {
-  const webDistPath = path.resolve(__dirname, '../../../web/dist');
+  const webDistPath = path.resolve(__dirname, '../../web/dist');
 
   // Serve static assets
   app.use(express.static(webDistPath));

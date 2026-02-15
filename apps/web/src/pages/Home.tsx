@@ -5,10 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
-
-// In production, API is at /api on same domain. In dev, use separate API server.
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
-const API_BASE = import.meta.env.PROD ? '/api' : API_URL;
+import { api } from '@/lib/api-client';
 
 function Home() {
   const [loading, setLoading] = useState(false);
@@ -20,18 +17,7 @@ function Home() {
     setError(null);
 
     try {
-      const response = await fetch(`${API_BASE}/games`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to create game');
-      }
-
-      const data: CreateGameResponse = await response.json();
+      const data = await api.games.create();
       setGameData(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');

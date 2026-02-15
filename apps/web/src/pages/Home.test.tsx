@@ -3,9 +3,16 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
 import Home from './Home';
+import { api } from '@/lib/api-client';
 
-// Mock fetch
-global.fetch = vi.fn();
+// Mock the API client
+vi.mock('@/lib/api-client', () => ({
+  api: {
+    games: {
+      create: vi.fn(),
+    },
+  },
+}));
 
 function renderHome() {
   return render(
@@ -32,18 +39,15 @@ describe('Home', () => {
     const user = userEvent.setup();
 
     // Mock a delayed response
-    (global.fetch as any).mockImplementation(
+    vi.mocked(api.games.create).mockImplementation(
       () =>
         new Promise((resolve) =>
           setTimeout(
             () =>
               resolve({
-                ok: true,
-                json: async () => ({
-                  gameId: 'test-game-id',
-                  whiteUrl: 'http://localhost:5173/g/test-game-id?token=white-token',
-                  blackUrl: 'http://localhost:5173/g/test-game-id?token=black-token',
-                }),
+                gameId: 'test-game-id',
+                whiteUrl: 'http://localhost:5173/g/test-game-id?token=white-token',
+                blackUrl: 'http://localhost:5173/g/test-game-id?token=black-token',
               }),
             100
           )
@@ -67,10 +71,7 @@ describe('Home', () => {
       blackUrl: 'http://localhost:5173/g/test-game-id?token=black-token-456',
     };
 
-    (global.fetch as any).mockResolvedValue({
-      ok: true,
-      json: async () => mockGameData,
-    });
+    vi.mocked(api.games.create).mockResolvedValue(mockGameData);
 
     renderHome();
 
@@ -93,10 +94,7 @@ describe('Home', () => {
   it('should display error message on failed creation', async () => {
     const user = userEvent.setup();
 
-    (global.fetch as any).mockResolvedValue({
-      ok: false,
-      status: 500,
-    });
+    vi.mocked(api.games.create).mockRejectedValue(new Error('Failed to create game'));
 
     renderHome();
 
@@ -117,16 +115,12 @@ describe('Home', () => {
       blackUrl: 'http://localhost:5173/g/test-game-id?token=black-token',
     };
 
-    (global.fetch as any).mockResolvedValue({
-      ok: true,
-      json: async () => mockGameData,
-    });
+    vi.mocked(api.games.create).mockResolvedValue(mockGameData);
 
     renderHome();
 
     // Create first game
     await user.click(screen.getByText('Create New Game'));
-
     await waitFor(() => {
       expect(screen.getByText(/Game Created Successfully/)).toBeInTheDocument();
     });

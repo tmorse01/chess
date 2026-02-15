@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { CreateGameResponse } from '@chess-app/shared';
-import { Copy, Zap } from 'lucide-react';
+import { Copy, Zap, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -131,6 +131,16 @@ function Home() {
                   data-testid="white-url"
                 />
                 <Button
+                  onClick={() => window.open(gameData.whiteUrl, '_blank')}
+                  variant="outline"
+                  size="icon"
+                  className="bg-white/20 hover:bg-white/30 border-white/30"
+                  title="Open in new window"
+                  data-testid="open-white-link"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                </Button>
+                <Button
                   onClick={() => copyToClipboard(gameData.whiteUrl)}
                   variant="outline"
                   size="icon"
@@ -154,6 +164,16 @@ function Home() {
                   className="flex-1 text-sm bg-white/10 border-white/30 text-white"
                   data-testid="black-url"
                 />
+                <Button
+                  onClick={() => window.open(gameData.blackUrl, '_blank')}
+                  variant="outline"
+                  size="icon"
+                  className="bg-white/20 hover:bg-white/30 border-white/30"
+                  title="Open in new window"
+                  data-testid="open-black-link"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                </Button>
                 <Button
                   onClick={() => copyToClipboard(gameData.blackUrl)}
                   variant="outline"

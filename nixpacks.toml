@@ -37,10 +37,9 @@ cmds = [
   "echo 'PATH:' $PATH",
   "pnpm --filter @chess-app/shared build",
   "pnpm --filter @chess-app/web build",
-  "pnpm --filter @chess-app/api run db:migrate",
   "pnpm --filter @chess-app/api build"
 ]
 env = { CI = "true" }
 
 [start]
-cmd = "pnpm --filter @chess-app/api start"
+cmd = "pnpm --filter @chess-app/api run db:migrate && pnpm --filter @chess-app/api start"

@@ -65,7 +65,7 @@ function Home() {
                 <Crown className="w-16 h-16 mx-auto text-yellow-400" />
                 <Sparkles className="w-6 h-6 absolute -top-4 -right-4 text-yellow-200 animate-pulse" />
               </div>
-              <h1 className="text-5xl md:text-6xl font-bold mb-4 bg-linear-to-r from-white via-violet-100 to-violet-200 bg-clip-text text-transparent">
+              <h1 className="text-5xl md:text-6xl font-bold pb-4 bg-linear-to-r from-white via-violet-100 to-violet-200 bg-clip-text text-transparent">
                 Play Chess Online
               </h1>
               <p className="text-xl md:text-2xl text-white/80 mb-4 font-light">

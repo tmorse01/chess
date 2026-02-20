@@ -45,7 +45,8 @@ app.get('/health', (_req: Request, res: Response) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// API Routes - mount under /api prefix
+// API Routes - support both legacy and prefixed paths
+app.use('/games', gamesRouter);
 app.use('/api/games', gamesRouter);
 
 // Serve static files from web app in production

@@ -142,11 +142,16 @@ test.describe('Game End States', () => {
     await blackPage.close();
   });
 
-  test('should allow creating new game after game ends', async ({ page }) => {
-    const { whiteUrl } = await createGame();
+  test('should allow creating new game after game ends', async ({ page, context }) => {
+    const { whiteUrl, blackUrl } = await createGame();
 
     await page.goto(whiteUrl);
     await page.waitForSelector(selectors.game.chessBoard);
+
+    const blackPage = await context.newPage();
+    await blackPage.goto(blackUrl);
+    await blackPage.waitForSelector(selectors.game.chessBoard);
+    await wait(500);
 
     // End the game via resignation
     await page.click(selectors.controls.resignButton);
@@ -164,5 +169,7 @@ test.describe('Game End States', () => {
     // Verify we're either on home or in a new game
     const url = page.url();
     expect(url).toBeTruthy();
+
+    await blackPage.close();
   });
 });

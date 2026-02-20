@@ -67,8 +67,13 @@ export function useChessGame({ gameId, token }: UseChessGameOptions): UseChessGa
       const friendlyMessage = getUserMessage('FETCH_GAME_ERROR');
       setError(friendlyMessage);
       toast.error(friendlyMessage);
+      setIsLoading(false);
     }
   }, [gameId]);
+
+  useEffect(() => {
+    fetchGameState();
+  }, [fetchGameState]);
 
   // Connect to socket and join game
   useEffect(() => {

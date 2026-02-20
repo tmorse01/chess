@@ -37,7 +37,8 @@ export default defineConfig({
   /* Run your local dev servers before starting the tests */
   webServer: [
     {
-      command: 'pnpm -F api dev',
+      command:
+        'cross-env DATABASE_URL=postgresql://postgres:postgres@localhost:5432/chess_test PORT=4000 CORS_ORIGIN=http://localhost:3000 pnpm -F api dev',
       url: 'http://localhost:4000/health',
       reuseExistingServer: !process.env.CI,
       timeout: 120 * 1000,

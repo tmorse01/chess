@@ -43,7 +43,7 @@ export function ChessBoard({ fen, playerColor, isPlayerTurn, status, onMove }: C
   }
 
   return (
-    <div className="w-full max-w-[min(90vw,600px)] touch-none">
+    <div className="w-full max-w-[min(90vw,600px)] touch-none" data-testid="chess-board">
       <ThemedChessboard
         position={fen}
         onPieceDrop={onDrop}

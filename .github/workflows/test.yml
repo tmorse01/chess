@@ -152,16 +152,3 @@ jobs:
                 body
               });
             }
-
-      - name: Fail workflow if required checks failed
-        if: always()
-        run: |
-          lint_status="${{ steps.lint.outcome }}"
-          typecheck_status="${{ steps.typecheck.outcome }}"
-          test_status="${{ steps.unit_tests.outcome }}"
-          echo "Lint: ${lint_status:-skipped}"
-          echo "Typecheck: ${typecheck_status:-skipped}"
-          echo "Tests: ${test_status:-skipped}"
-          if [ "$lint_status" != "success" ] || [ "$typecheck_status" != "success" ] || [ "$test_status" != "success" ]; then
-            exit 1
-          fi

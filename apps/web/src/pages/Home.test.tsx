@@ -14,6 +14,11 @@ vi.mock('@/lib/api-client', () => ({
   },
 }));
 
+// Mock BoardPlayground to avoid react-chessboard complexity in unit tests
+vi.mock('@/components/BoardPlayground', () => ({
+  BoardPlayground: () => <div data-testid="board-playground">Board Playground Mock</div>,
+}));
+
 function renderHome() {
   return render(
     <BrowserRouter>
@@ -142,5 +147,10 @@ describe('Home', () => {
     const howBuiltLink = screen.getByTestId('how-built-link');
     expect(howBuiltLink).toBeInTheDocument();
     expect(howBuiltLink.closest('a')).toHaveAttribute('href', '/how-it-was-built');
+  });
+
+  it('should render the board playground on the home page', () => {
+    renderHome();
+    expect(screen.getByTestId('board-playground')).toBeInTheDocument();
   });
 });

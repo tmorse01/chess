@@ -31,7 +31,15 @@ interface DrawData {
  */
 export function setupGameHandlers(io: Server): void {
   io.on('connection', (socket: Socket) => {
-    console.log('Client connected:', socket.id);
+    console.log('[SOCKET] Client connected:', socket.id);
+
+    socket.on('disconnect', (reason) => {
+      console.log('[SOCKET] Disconnected:', socket.id, '-', reason);
+    });
+
+    socket.on('error', (error) => {
+      console.log('[SOCKET] Error:', error);
+    });
 
     /**
      * Join a game room
@@ -40,33 +48,24 @@ export function setupGameHandlers(io: Server): void {
     socket.on('join_game', async (data: JoinGameData) => {
       try {
         const { gameId, token } = data;
-        console.log(`[join_game] Socket ${socket.id} attempting to join game ${gameId}`);
+        console.log('[join_game] Received for game:', gameId);
 
         // Validate token
         const tokenValidation = await gameRepository.validateToken(gameId, token);
         if (!tokenValidation.valid) {
-          console.log(`[join_game] Invalid token for game ${gameId}`);
+          console.log('[join_game] Invalid token');
           socket.emit('game_error', { message: 'Invalid token' });
           return;
         }
-        console.log(
-          `[join_game] Token validated for game ${gameId}, player color: ${tokenValidation.color}`
-        );
+        console.log('[join_game] Token valid, player:', tokenValidation.color);
 
         // Join the game room
         const roomName = `game:${gameId}`;
         await socket.join(roomName);
 
-        console.log(
-          `[join_game] Socket ${socket.id} joined room ${roomName} as ${tokenValidation.color}`
-        );
-
         // Get current game state and send to player
         const game = await gameRepository.findById(gameId);
-        console.log(
-          `[join_game] Game retrieved:`,
-          game ? `status=${game.status}, turn=${game.turn}` : 'null'
-        );
+        console.log('[join_game] Game state:', game?.status, game?.turn);
 
         if (game) {
           const gameStatePayload = {
@@ -78,28 +77,25 @@ export function setupGameHandlers(io: Server): void {
             pgn: game.pgn,
             playerColor: tokenValidation.color,
           };
-          console.log(`[join_game] Emitting game_state to socket ${socket.id}:`, gameStatePayload);
           socket.emit('game_state', gameStatePayload);
 
           // Also emit player_color for the useChessGame hook
           const colorName = tokenValidation.color === 'w' ? 'white' : 'black';
-          console.log(`[join_game] Emitting player_color: ${colorName} to socket ${socket.id}`);
           socket.emit('player_color', colorName);
         }
 
         // Notify room that a player joined
-        console.log(`[join_game] Broadcasting player_joined to room ${roomName}`);
         io.to(roomName).emit('player_joined', {
           playerColor: tokenValidation.color,
         });
 
         // Check if both players are now connected
         const socketsInRoom = await io.in(roomName).fetchSockets();
-        console.log(`[join_game] Room ${roomName} now has ${socketsInRoom.length} sockets`);
+        console.log('[join_game] Room has', socketsInRoom.length, 'sockets');
 
         // If 2 players are connected and game is still waiting, activate it
         if (socketsInRoom.length >= 2 && game && game.status === 'waiting') {
-          console.log(`[join_game] Both players connected! Updating game status to 'active'`);
+          console.log('[join_game] Both players connected, activating game');
           const updatedGame = await gameRepository.updateGameState(gameId, { status: 'active' });
 
           if (updatedGame) {
@@ -112,10 +108,6 @@ export function setupGameHandlers(io: Server): void {
               result: updatedGame.result,
               endedReason: updatedGame.endedReason,
             };
-            console.log(
-              `[join_game] Broadcasting updated game_state with status='active':`,
-              updatedGameState
-            );
             io.to(roomName).emit('game_state', updatedGameState);
           }
         }
@@ -132,7 +124,7 @@ export function setupGameHandlers(io: Server): void {
     socket.on('make_move', async (data: MakeMoveData) => {
       try {
         const { gameId, token, from, to, promotion } = data;
-        console.log(`[make_move] Socket ${socket.id} attempting move: ${from}->${to} in game ${gameId}`);
+        console.log('[make_move] Move attempt:', from, '->', to, 'in', gameId);
 
         // Apply the move using chess service
         const result = await chessService.applyMove({
@@ -144,15 +136,14 @@ export function setupGameHandlers(io: Server): void {
         });
 
         if (!result.success) {
-          // Send rejection only to the player who made the move
-          console.log(`[make_move] Move rejected: ${result.error}`);
+          console.log('[make_move] Rejected:', result.error);
           socket.emit('move_rejected', {
             reason: result.error || 'Invalid move',
           });
           return;
         }
-        
-        console.log(`[make_move] Move successful, broadcasting updated state`);
+
+        console.log('[make_move] Move successful');
 
         // Broadcast updated game state to all players in the room
         const roomName = `game:${gameId}`;
@@ -169,11 +160,11 @@ export function setupGameHandlers(io: Server): void {
           result: result.result,
           endedReason: result.endedReason,
         };
-        console.log(`[make_move] Broadcasting game_state to room ${roomName}:`, gameStateUpdate);
         io.to(roomName).emit('game_state', gameStateUpdate);
 
         // If game ended, emit specific event
         if (result.gameEnded) {
+          console.log('[make_move] Game ended:', result.result);
           io.to(roomName).emit('game_ended', {
             result: result.result,
             reason: result.endedReason,

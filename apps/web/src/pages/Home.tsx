@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import type { CreateGameResponse } from '@chess-app/shared';
-import { Copy, Zap, ExternalLink, Crown, Users, Sparkles, Clock } from 'lucide-react';
+import { Copy, Zap, ExternalLink, Crown, Users, Sparkles, Clock, BookOpen, Code2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -146,6 +147,27 @@ function Home() {
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}
+            </div>
+
+            {/* Marketing Links */}
+            <div className="mt-10 pt-8 border-t border-white/10 flex flex-col sm:flex-row gap-4 justify-center items-center text-sm text-white/50">
+              <Link
+                to="/getting-started"
+                className="flex items-center gap-2 hover:text-white/80 transition-colors"
+                data-testid="getting-started-link"
+              >
+                <BookOpen className="w-4 h-4" />
+                Getting Started Guide
+              </Link>
+              <span className="hidden sm:inline text-white/20">·</span>
+              <Link
+                to="/how-it-was-built"
+                className="flex items-center gap-2 hover:text-white/80 transition-colors"
+                data-testid="how-built-link"
+              >
+                <Code2 className="w-4 h-4" />
+                How It Was Built
+              </Link>
             </div>
           </>
         ) : (

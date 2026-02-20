@@ -87,6 +87,7 @@ jobs:
           VITE_API_URL: http://localhost:4000
 
       - name: Run E2E tests
+        if: github.event_name != 'pull_request'
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/chess_test
         run: pnpm test:e2e

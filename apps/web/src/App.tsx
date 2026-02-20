@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import Home from './pages/Home';
 import Game from './pages/Game';
+import HowItWasBuilt from './pages/HowItWasBuilt';
+import GettingStarted from './pages/GettingStarted';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
 function App() {
@@ -10,6 +12,8 @@ function App() {
       <main>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/how-it-was-built" element={<HowItWasBuilt />} />
+          <Route path="/getting-started" element={<GettingStarted />} />
           <Route
             path="/g/:gameId"
             element={

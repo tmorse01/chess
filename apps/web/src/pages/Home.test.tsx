@@ -14,6 +14,11 @@ vi.mock('@/lib/api-client', () => ({
   },
 }));
 
+// Mock BoardPlayground to avoid react-chessboard complexity in unit tests
+vi.mock('@/components/BoardPlayground', () => ({
+  BoardPlayground: () => <div data-testid="board-playground">Board Playground Mock</div>,
+}));
+
 function renderHome() {
   return render(
     <BrowserRouter>
@@ -30,9 +35,9 @@ describe('Home', () => {
   it('should render the home page with create game button', () => {
     renderHome();
 
-    expect(screen.getByText('Chess Game')).toBeInTheDocument();
-    expect(screen.getByText('Create New Game')).toBeInTheDocument();
-    expect(screen.getByText(/Create a new game and share the links/)).toBeInTheDocument();
+    expect(screen.getByText('Play Chess Online')).toBeInTheDocument();
+    expect(screen.getByTestId('create-game-button')).toBeInTheDocument();
+    expect(screen.getByText(/Challenge your friends to an instant match/)).toBeInTheDocument();
   });
 
   it('should show loading state when creating a game', async () => {
@@ -56,7 +61,7 @@ describe('Home', () => {
 
     renderHome();
 
-    const createButton = screen.getByText('Create New Game');
+    const createButton = screen.getByTestId('create-game-button');
     await user.click(createButton);
 
     expect(screen.getByText('Creating Game...')).toBeInTheDocument();
@@ -75,15 +80,15 @@ describe('Home', () => {
 
     renderHome();
 
-    const createButton = screen.getByText('Create New Game');
+    const createButton = screen.getByTestId('create-game-button');
     await user.click(createButton);
 
     await waitFor(() => {
-      expect(screen.getByText(/Game Created Successfully/)).toBeInTheDocument();
+      expect(screen.getByText(/Game Ready!/)).toBeInTheDocument();
     });
 
-    expect(screen.getByText('White Player Link')).toBeInTheDocument();
-    expect(screen.getByText('Black Player Link')).toBeInTheDocument();
+    expect(screen.getByText('White Player')).toBeInTheDocument();
+    expect(screen.getByText('Black Player')).toBeInTheDocument();
 
     const inputs = screen.getAllByRole('textbox') as HTMLInputElement[];
     expect(inputs).toHaveLength(2);
@@ -98,7 +103,7 @@ describe('Home', () => {
 
     renderHome();
 
-    const createButton = screen.getByText('Create New Game');
+    const createButton = screen.getByTestId('create-game-button');
     await user.click(createButton);
 
     await waitFor(() => {
@@ -120,15 +125,32 @@ describe('Home', () => {
     renderHome();
 
     // Create first game
-    await user.click(screen.getByText('Create New Game'));
+    await user.click(screen.getByTestId('create-game-button'));
     await waitFor(() => {
-      expect(screen.getByText(/Game Created Successfully/)).toBeInTheDocument();
+      expect(screen.getByText(/Game Ready!/)).toBeInTheDocument();
     });
 
     // Click create another game
     await user.click(screen.getByText('Create Another Game'));
 
     // Should show create button again
-    expect(screen.getByText('Create New Game')).toBeInTheDocument();
+    expect(screen.getByTestId('create-game-button')).toBeInTheDocument();
+  });
+
+  it('should render navigation links to marketing pages', () => {
+    renderHome();
+
+    const gettingStartedLink = screen.getByTestId('getting-started-link');
+    expect(gettingStartedLink).toBeInTheDocument();
+    expect(gettingStartedLink.closest('a')).toHaveAttribute('href', '/getting-started');
+
+    const howBuiltLink = screen.getByTestId('how-built-link');
+    expect(howBuiltLink).toBeInTheDocument();
+    expect(howBuiltLink.closest('a')).toHaveAttribute('href', '/how-it-was-built');
+  });
+
+  it('should render the board playground on the home page', () => {
+    renderHome();
+    expect(screen.getByTestId('board-playground')).toBeInTheDocument();
   });
 });

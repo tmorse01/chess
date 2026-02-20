@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import type { CreateGameResponse } from '@chess-app/shared';
-import { Copy, Zap, ExternalLink, Crown, Users, Sparkles, Clock } from 'lucide-react';
+import { Copy, Zap, ExternalLink, Crown, Users, Sparkles, Clock, BookOpen, Code2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { BoardPlayground } from '@/components/BoardPlayground';
 import { api } from '@/lib/api-client';
 
 function Home() {
@@ -55,30 +57,87 @@ function Home() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="frosted-glass p-8 md:p-12 max-w-4xl w-full">
+    <div className="min-h-screen flex items-center justify-center p-4 py-8">
+      <div className="frosted-glass p-8 md:p-12 max-w-6xl w-full">
         {!gameData ? (
           <>
-            {/* Hero Section */}
-            <div className="text-center mb-12">
-              <div className="inline-block mb-6 relative">
-                <Crown className="w-16 h-16 mx-auto text-yellow-400" />
-                <Sparkles className="w-6 h-6 absolute -top-4 -right-4 text-yellow-200 animate-pulse" />
+            {/* Hero + Playground: two-column on large screens */}
+            <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center mb-12">
+              {/* Left: Hero content */}
+              <div>
+                <div className="inline-block mb-6 relative">
+                  <Crown className="w-16 h-16 mx-auto text-yellow-400" />
+                  <Sparkles className="w-6 h-6 absolute -top-4 -right-4 text-yellow-200 animate-pulse" />
+                </div>
+                <h1 className="text-5xl md:text-6xl font-bold pb-4 bg-linear-to-r from-white via-violet-100 to-violet-200 bg-clip-text text-transparent">
+                  Play Chess Online
+                </h1>
+                <p className="text-xl md:text-2xl text-white/80 mb-4 font-light">
+                  Challenge your friends to an instant match
+                </p>
+                <p className="text-white/60 mb-8">
+                  No sign-up required. Create a game in seconds and share secure links with your
+                  opponent. Play from anywhere, on any device.
+                </p>
+
+                {/* CTA Button */}
+                <div>
+                  <Button
+                    onClick={createGame}
+                    disabled={loading}
+                    size="lg"
+                    className="bg-linear-to-r from-violet-600 to-violet-800 hover:from-violet-700 hover:to-violet-900 text-white shadow-xl hover:shadow-2xl transition-all transform hover:scale-105 min-h-14 px-12 text-lg font-semibold"
+                    data-testid="create-game-button"
+                  >
+                    {loading ? (
+                      <LoadingSpinner size="sm" text="Creating Game..." />
+                    ) : (
+                      <>
+                        <Crown className="w-5 h-5 mr-2" />
+                        Start Playing Now
+                      </>
+                    )}
+                  </Button>
+
+                  {import.meta.env.DEV && (
+                    <div className="mt-4">
+                      <Button
+                        onClick={createAndJoinAsWhite}
+                        disabled={loading}
+                        size="sm"
+                        variant="outline"
+                        className="gap-2"
+                        title="Ctrl+D - Create and join as white player"
+                      >
+                        <Zap className="h-4 w-4" />
+                        Quick Dev Game
+                      </Button>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Tip: Press <kbd className="px-2 py-1 bg-white/10 rounded">Ctrl+D</kbd> for
+                        quick test
+                      </p>
+                    </div>
+                  )}
+
+                  {error && (
+                    <Alert variant="destructive" className="mt-6 max-w-md">
+                      <AlertDescription>{error}</AlertDescription>
+                    </Alert>
+                  )}
+                </div>
               </div>
-              <h1 className="text-5xl md:text-6xl font-bold pb-4 bg-linear-to-r from-white via-violet-100 to-violet-200 bg-clip-text text-transparent">
-                Play Chess Online
-              </h1>
-              <p className="text-xl md:text-2xl text-white/80 mb-4 font-light">
-                Challenge your friends to an instant match
-              </p>
-              <p className="text-white/60 max-w-2xl mx-auto">
-                No sign-up required. Create a game in seconds and share secure links with your
-                opponent. Play from anywhere, on any device.
-              </p>
+
+              {/* Right: Board playground */}
+              <div className="flex flex-col items-center">
+                <p className="text-sm text-white/50 mb-4 font-medium tracking-wide uppercase">
+                  Try it out
+                </p>
+                <BoardPlayground />
+              </div>
             </div>
 
             {/* Features Grid */}
-            <div className="grid md:grid-cols-3 gap-6 mb-12">
+            <div className="grid md:grid-cols-3 gap-6 mb-10">
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20 hover:bg-white/15 transition-all">
                 <Users className="w-8 h-8 mb-3 text-violet-400" />
                 <h3 className="text-lg font-semibold mb-2">Multiplayer</h3>
@@ -102,50 +161,25 @@ function Home() {
               </div>
             </div>
 
-            {/* CTA Section */}
-            <div className="text-center">
-              <Button
-                onClick={createGame}
-                disabled={loading}
-                size="lg"
-                className="bg-linear-to-r from-violet-600 to-violet-800 hover:from-violet-700 hover:to-violet-900 text-white shadow-xl hover:shadow-2xl transition-all transform hover:scale-105 min-h-14 px-12 text-lg font-semibold"
-                data-testid="create-game-button"
+            {/* Marketing Links */}
+            <div className="pt-6 border-t border-white/10 flex flex-col sm:flex-row gap-4 justify-center items-center text-sm text-white/50">
+              <Link
+                to="/getting-started"
+                className="flex items-center gap-2 hover:text-white/80 transition-colors"
+                data-testid="getting-started-link"
               >
-                {loading ? (
-                  <LoadingSpinner size="sm" text="Creating Game..." />
-                ) : (
-                  <>
-                    <Crown className="w-5 h-5 mr-2" />
-                    Start Playing Now
-                  </>
-                )}
-              </Button>
-
-              {import.meta.env.DEV && (
-                <div className="mt-4">
-                  <Button
-                    onClick={createAndJoinAsWhite}
-                    disabled={loading}
-                    size="sm"
-                    variant="outline"
-                    className="gap-2"
-                    title="Ctrl+D - Create and join as white player"
-                  >
-                    <Zap className="h-4 w-4" />
-                    Quick Dev Game
-                  </Button>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    Tip: Press <kbd className="px-2 py-1 bg-white/10 rounded">Ctrl+D</kbd> for quick
-                    test
-                  </p>
-                </div>
-              )}
-
-              {error && (
-                <Alert variant="destructive" className="mt-6 max-w-md mx-auto">
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
+                <BookOpen className="w-4 h-4" />
+                Getting Started Guide
+              </Link>
+              <span className="hidden sm:inline text-white/20">·</span>
+              <Link
+                to="/how-it-was-built"
+                className="flex items-center gap-2 hover:text-white/80 transition-colors"
+                data-testid="how-built-link"
+              >
+                <Code2 className="w-4 h-4" />
+                How It Was Built
+              </Link>
             </div>
           </>
         ) : (

@@ -113,24 +113,55 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            const marker = '<!-- ci-check-results -->';
+            const normalize = (status) =>
+              ['success', 'failure', 'cancelled', 'skipped'].includes(status) ? status : 'unknown';
             const icon = (status) => status === 'success' ? '✅' : '❌';
+            const lintStatus = normalize('${{ steps.lint.outcome }}');
+            const typecheckStatus = normalize('${{ steps.typecheck.outcome }}');
+            const testStatus = normalize('${{ steps.unit_tests.outcome }}');
             const body = [
+              marker,
               '## CI Check Results',
               '',
-              `- ${icon('${{ steps.lint.outcome }}')} Lint: \`${{ steps.lint.outcome }}\``,
-              `- ${icon('${{ steps.typecheck.outcome }}')} Typecheck: \`${{ steps.typecheck.outcome }}\``,
-              `- ${icon('${{ steps.unit_tests.outcome }}')} Tests: \`${{ steps.unit_tests.outcome }}\``
+              `- ${icon(lintStatus)} Lint: \`${lintStatus}\``,
+              `- ${icon(typecheckStatus)} Typecheck: \`${typecheckStatus}\``,
+              `- ${icon(testStatus)} Tests: \`${testStatus}\``
             ].join('\n');
-            await github.rest.issues.createComment({
+            const comments = await github.paginate(github.rest.issues.listComments, {
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
-              body
+              per_page: 100
             });
+            const existing = comments.find((comment) =>
+              comment.user?.type === 'Bot' && comment.body?.includes(marker)
+            );
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body
+              });
+            }
 
       - name: Fail workflow if required checks failed
         if: always()
         run: |
-          [ "${{ steps.lint.outcome }}" = "success" ] &&
-          [ "${{ steps.typecheck.outcome }}" = "success" ] &&
-          [ "${{ steps.unit_tests.outcome }}" = "success" ]
+          lint_status="${{ steps.lint.outcome }}"
+          typecheck_status="${{ steps.typecheck.outcome }}"
+          test_status="${{ steps.unit_tests.outcome }}"
+          echo "Lint: ${lint_status:-skipped}"
+          echo "Typecheck: ${typecheck_status:-skipped}"
+          echo "Tests: ${test_status:-skipped}"
+          if [ "$lint_status" != "success" ] || [ "$typecheck_status" != "success" ] || [ "$test_status" != "success" ]; then
+            exit 1
+          fi

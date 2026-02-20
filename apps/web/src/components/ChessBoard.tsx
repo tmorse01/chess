@@ -1,4 +1,4 @@
-import { Chessboard } from 'react-chessboard';
+import { ThemedChessboard } from './ThemedChessboard';
 // import { Chess } from 'chess.js';
 
 interface ChessBoardProps {
@@ -42,30 +42,13 @@ export function ChessBoard({ fen, playerColor, isPlayerTurn, status, onMove }: C
     }
   }
 
-  // Board styling
-  const customBoardStyle = {
-    borderRadius: '12px',
-    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
-  };
-
-  const customDarkSquareStyle = {
-    backgroundColor: '#779952',
-  };
-
-  const customLightSquareStyle = {
-    backgroundColor: '#edeed1',
-  };
-
   return (
     <div className="w-full max-w-[min(90vw,600px)] touch-none">
-      <Chessboard
+      <ThemedChessboard
         position={fen}
         onPieceDrop={onDrop}
         boardOrientation={playerColor || 'white'}
         arePiecesDraggable={isInteractive}
-        customBoardStyle={customBoardStyle}
-        customDarkSquareStyle={customDarkSquareStyle}
-        customLightSquareStyle={customLightSquareStyle}
         animationDuration={200}
         snapToCursor={true}
       />

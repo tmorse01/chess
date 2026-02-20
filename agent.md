@@ -247,6 +247,7 @@ apps/web/src/
 4. **Icon sizing** - Use consistent icon sizes (`w-4 h-4`, `w-5 h-5`, `w-6 h-6`)
 5. **Color semantics** - Use colors meaningfully (green=success, red=error, etc.)
 6. **Accessibility** - Ensure proper contrast ratios and keyboard navigation
+7. **Chessboard styling** - Never apply `frosted-glass` or excessive styling to the board or its immediate parent containers. This interferes with piece dragging and positioning. Keep board containers clean with only necessary layout utilities.
 
 ### Code Style
 
@@ -281,7 +282,36 @@ export function GameCard() {
 
 ## Common Patterns for Chess App
 
-### Game Status Indicators
+### Chessboard Component Styling
+
+When styling the ChessBoard component and its containers, keep styling minimal to avoid interfering with piece drag interactions:
+
+```tsx
+// ✅ Good: Minimal styling on board containers
+<div>
+  <ChessBoard
+    fen={fen}
+    playerColor={playerColor}
+    isPlayerTurn={isPlayerTurn}
+    status={status}
+    onMove={onMove}
+  />
+</div>
+
+// ❌ Avoid: Heavy styling that interferes with dragging
+<div className="frosted-glass backdrop-blur-lg">
+  <ChessBoard />
+</div>
+```
+
+The `ChessBoard` component's internal styling (white/light square colors, shadows on the board itself) is fine. The issue arises when parent containers apply glass-morphism effects or excessive positioning styles that create unwanted event handling conflicts.
+
+**Key Rules:**
+
+- No `frosted-glass` or `backdrop-blur` on board wrappers
+- No `customSquareStyles` with excessive highlighting
+- Keep parent containers clean with only layout utilities (flex, grid, max-w, p)
+- Board's own `customBoardStyle`, `customDarkSquareStyle`, `customLightSquareStyle` are fine
 
 ```tsx
 import { Badge } from '@/components/ui/badge';

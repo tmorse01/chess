@@ -23,6 +23,8 @@ function Home() {
   const navigate = useNavigate();
   const { gameId: routeGameId } = useParams<{ gameId?: string }>();
   const [searchParams] = useSearchParams();
+  const whiteTokenFromQuery = searchParams.get('whiteToken');
+  const blackTokenFromQuery = searchParams.get('blackToken');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [gameData, setGameData] = useState<CreateGameResponse | null>(null);
@@ -34,12 +36,17 @@ function Home() {
     try {
       const data = await api.games.create();
       setGameData(data);
-      const whiteToken = new URL(data.whiteUrl).searchParams.get('token');
-      const blackToken = new URL(data.blackUrl).searchParams.get('token');
+      try {
+        const whiteToken = new URL(data.whiteUrl).searchParams.get('token');
+        const blackToken = new URL(data.blackUrl).searchParams.get('token');
 
-      if (whiteToken && blackToken) {
-        const gameParams = new URLSearchParams({ whiteToken, blackToken });
-        navigate(`/start/${data.gameId}?${gameParams.toString()}`);
+        if (whiteToken && blackToken) {
+          const gameParams = new URLSearchParams({ whiteToken, blackToken });
+          navigate(`/start/${data.gameId}?${gameParams.toString()}`);
+        }
+      } catch {
+        // Keep game links visible even if URL parsing/state sync fails
+        console.warn('Failed to sync start-game URL state');
       }
 
       return data;
@@ -80,26 +87,25 @@ function Home() {
   };
 
   useEffect(() => {
-    if (gameData) {
-      return;
-    }
-
-    const whiteToken = searchParams.get('whiteToken');
-    const blackToken = searchParams.get('blackToken');
-
-    if (!routeGameId || !whiteToken || !blackToken) {
+    if (!routeGameId || !whiteTokenFromQuery || !blackTokenFromQuery) {
       return;
     }
 
     const buildPlayerUrl = (token: string) =>
       `${window.location.origin}/g/${routeGameId}?${new URLSearchParams({ token }).toString()}`;
 
-    setGameData({
-      gameId: routeGameId,
-      whiteUrl: buildPlayerUrl(whiteToken),
-      blackUrl: buildPlayerUrl(blackToken),
+    setGameData((current) => {
+      if (current) {
+        return current;
+      }
+
+      return {
+        gameId: routeGameId,
+        whiteUrl: buildPlayerUrl(whiteTokenFromQuery),
+        blackUrl: buildPlayerUrl(blackTokenFromQuery),
+      };
     });
-  }, [gameData, routeGameId, searchParams]);
+  }, [blackTokenFromQuery, routeGameId, whiteTokenFromQuery]);
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 py-8">

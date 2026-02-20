@@ -189,8 +189,11 @@ export function GameInfo({
 
       {/* Status Message */}
       {status === 'waiting' && (
-        <Alert className="bg-warning/10 border-warning/30" data-testid="game-status">
-          <AlertDescription className="text-sm text-warning-foreground">
+        <Alert
+          className="bg-amber-500/50 border-amber-400/60"
+          data-testid="game-status"
+        >
+          <AlertDescription className="text-sm font-medium text-amber-950">
             Share this link with your opponent to start the game!
           </AlertDescription>
         </Alert>

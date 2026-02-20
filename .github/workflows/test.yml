@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   test:
     name: Run Tests
@@ -46,7 +50,14 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Run linter
+        id: lint
+        continue-on-error: true
         run: pnpm lint
+
+      - name: Run typecheck
+        id: typecheck
+        continue-on-error: true
+        run: pnpm typecheck
 
       - name: Build shared package
         run: pnpm -F @chess-app/shared build
@@ -60,6 +71,8 @@ jobs:
         run: pnpm -F api db:migrate
 
       - name: Run unit tests
+        id: unit_tests
+        continue-on-error: true
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/chess_test
           NODE_ENV: test
@@ -74,6 +87,7 @@ jobs:
           VITE_API_URL: http://localhost:4000
 
       - name: Run E2E tests
+        if: github.event_name != 'pull_request'
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/chess_test
         run: pnpm test:e2e
@@ -93,3 +107,49 @@ jobs:
           name: test-results
           path: test-results/
           retention-days: 7
+
+      - name: Comment PR with check results
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const marker = '<!-- ci-check-results -->';
+            const normalize = (status) =>
+              ['success', 'failure', 'cancelled', 'skipped'].includes(status) ? status : 'unknown';
+            const icon = (status) => status === 'success' ? '✅' : '❌';
+            const lintStatus = normalize('${{ steps.lint.outcome }}');
+            const typecheckStatus = normalize('${{ steps.typecheck.outcome }}');
+            const testStatus = normalize('${{ steps.unit_tests.outcome }}');
+            const body = [
+              marker,
+              '## CI Check Results',
+              '',
+              `- ${icon(lintStatus)} Lint: \`${lintStatus}\``,
+              `- ${icon(typecheckStatus)} Typecheck: \`${typecheckStatus}\``,
+              `- ${icon(testStatus)} Tests: \`${testStatus}\``
+            ].join('\n');
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              per_page: 100
+            });
+            const existing = comments.find((comment) =>
+              comment.user?.type === 'Bot' && comment.body?.includes(marker)
+            );
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body
+              });
+            }

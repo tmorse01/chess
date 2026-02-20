@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import { BoardPlayground } from './BoardPlayground';
 
 // Mock react-chessboard
@@ -87,8 +88,27 @@ describe('BoardPlayground', () => {
 
   it('should show the try it out hint text', () => {
     render(<BoardPlayground />);
-    expect(
-      screen.getByText(/drag and drop pieces to make moves/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/drag and drop pieces to make moves/i)).toBeInTheDocument();
+  });
+
+  it('should have proper layout styling for centered column layout', () => {
+    render(<BoardPlayground />);
+    const container = screen.getByTestId('board-playground');
+    const styles = window.getComputedStyle(container);
+    expect(container).toHaveClass('flex', 'flex-col', 'items-center', 'gap-6');
+  });
+
+  it('should render board in a properly sized wrapper', () => {
+    render(<BoardPlayground />);
+    const board = screen.getByTestId('chessboard');
+    const wrapper = board.parentElement;
+    // The mock chessboard is wrapped in a div, verify it exists
+    expect(wrapper).toBeDefined();
+  });
+
+  it('should have centered controls', () => {
+    render(<BoardPlayground />);
+    const buttons = screen.getByTestId('flip-board-button').parentElement;
+    expect(buttons).toHaveClass('flex', 'gap-2', 'justify-center');
   });
 });

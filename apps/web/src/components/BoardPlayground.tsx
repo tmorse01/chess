@@ -1,21 +1,12 @@
 import { useState, useCallback } from 'react';
 import { Chess } from 'chess.js';
-import { Chessboard } from 'react-chessboard';
 import { RotateCcw, FlipHorizontal2, Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-
-const customBoardStyle = {
-  borderRadius: '12px',
-  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
-};
-
-const customDarkSquareStyle = { backgroundColor: '#779952' };
-const customLightSquareStyle = { backgroundColor: '#edeed1' };
+import { ThemedChessboard } from './ThemedChessboard';
 
 export function BoardPlayground() {
   const [game, setGame] = useState(() => new Chess());
   const [boardOrientation, setBoardOrientation] = useState<'white' | 'black'>('white');
-  const [lastMove, setLastMove] = useState<{ from: string; to: string } | null>(null);
 
   const fen = game.fen();
   const turn = game.turn() === 'w' ? 'White' : 'Black';
@@ -50,7 +41,6 @@ export function BoardPlayground() {
 
       if (!result) return false;
 
-      setLastMove({ from: sourceSquare, to: targetSquare });
       setGame(newGame);
       return true;
     },
@@ -59,21 +49,14 @@ export function BoardPlayground() {
 
   const handleReset = () => {
     setGame(new Chess());
-    setLastMove(null);
   };
 
   const handleFlip = () => {
     setBoardOrientation((prev) => (prev === 'white' ? 'black' : 'white'));
   };
 
-  const customSquareStyles: Record<string, React.CSSProperties> = {};
-  if (lastMove) {
-    customSquareStyles[lastMove.from] = { backgroundColor: 'rgba(255, 255, 0, 0.25)' };
-    customSquareStyles[lastMove.to] = { backgroundColor: 'rgba(255, 255, 0, 0.35)' };
-  }
-
   return (
-    <div className="flex flex-col items-center gap-4" data-testid="board-playground">
+    <div className="flex flex-col items-center gap-6" data-testid="board-playground">
       {/* Turn / Status indicator */}
       <div className="flex items-center gap-3">
         {isGameOver ? (
@@ -97,23 +80,19 @@ export function BoardPlayground() {
       </div>
 
       {/* Chess Board */}
-      <div className="w-full max-w-[min(85vw,420px)]">
-        <Chessboard
+      <div className="w-full max-w-[min(90vw,500px)]">
+        <ThemedChessboard
           position={fen}
           onPieceDrop={handleDrop}
           boardOrientation={boardOrientation}
           arePiecesDraggable={!isGameOver}
-          customBoardStyle={customBoardStyle}
-          customDarkSquareStyle={customDarkSquareStyle}
-          customLightSquareStyle={customLightSquareStyle}
-          customSquareStyles={customSquareStyles}
           animationDuration={150}
-          snapToCursor={false}
+          snapToCursor={true}
         />
       </div>
 
       {/* Controls */}
-      <div className="flex gap-2">
+      <div className="flex gap-2 justify-center">
         <Button
           onClick={handleFlip}
           variant="outline"

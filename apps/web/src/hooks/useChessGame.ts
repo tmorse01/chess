@@ -78,15 +78,20 @@ export function useChessGame({ gameId, token }: UseChessGameOptions): UseChessGa
   // Connect to socket and join game
   useEffect(() => {
     const socketUrl = getSocketUrl();
-    console.log('[useChessGame] Initializing socket connection to:', socketUrl);
-    console.log('[useChessGame] GameId:', gameId, 'Token:', token?.substring(0, 8) + '...');
+    console.log('[useChessGame] Connecting:', gameId);
 
-    const newSocket = io(socketUrl, {
+    const socketConfig = {
       transports: ['websocket', 'polling'],
-    });
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      reconnectionAttempts: 5,
+    };
+
+    const newSocket = io(socketUrl, socketConfig);
 
     newSocket.on('connect', () => {
-      console.log('[useChessGame] Socket connected, ID:', newSocket.id);
+      console.log('[useChessGame] Connected');
       setConnectionStatus('connected');
       setError(null);
 
@@ -95,26 +100,31 @@ export function useChessGame({ gameId, token }: UseChessGameOptions): UseChessGa
 
       // On reconnection, fetch latest state from REST API as backup
       if (!isLoading) {
+        console.log('[useChessGame] Fetching game state on reconnection');
         fetchGameState();
       }
     });
 
     newSocket.on('disconnect', (reason) => {
-      console.log('[useChessGame] Socket disconnected. Reason:', reason);
+      console.log('[useChessGame] Disconnected:', reason);
       setConnectionStatus('reconnecting');
-      toast.info('Connection lost. Reconnecting...');
     });
 
-    newSocket.on('connect_error', () => {
+    newSocket.on('connect_error', (error) => {
+      console.log('[useChessGame] Connection error:', error?.message);
       const friendlyMessage = getUserMessage('CONNECTION_ERROR');
       setError(friendlyMessage);
       toast.error(friendlyMessage);
       setIsLoading(false);
     });
 
+    newSocket.on('reconnect_failed', () => {
+      console.log('[useChessGame] Reconnection failed');
+    });
+
     // Listen for game state updates
     newSocket.on('game_state', (data: GameStateUpdate) => {
-      console.log('[useChessGame] Received game_state:', data);
+      console.log('[useChessGame] Game state:', data.status, data.turn);
       setFen(data.fen);
       setTurn(data.turn);
       setStatus(data.status);
@@ -127,7 +137,7 @@ export function useChessGame({ gameId, token }: UseChessGameOptions): UseChessGa
 
     // Listen for player color assignment
     newSocket.on('player_color', (color: 'white' | 'black') => {
-      console.log('[useChessGame] Received player_color:', color);
+      console.log('[useChessGame] Player color:', color);
       setPlayerColor(color);
     });
 
@@ -136,14 +146,12 @@ export function useChessGame({ gameId, token }: UseChessGameOptions): UseChessGa
       console.log('[useChessGame] Move rejected:', data.reason);
       const friendlyMessage = getUserMessage(data.reason);
       toast.error(friendlyMessage);
-      // Don't set error state for move rejections - they're temporary
-      // Clear error after 3 seconds
       setTimeout(() => setError(null), 3000);
     });
 
     // Listen for game errors
     newSocket.on('error', (data: { message: string }) => {
-      console.log('[useChessGame] Game error:', data.message);
+      console.log('[useChessGame] Error:', data.message);
       const friendlyMessage = getUserMessage(data.message);
       const displayType = getErrorDisplayType(data.message);
 
@@ -155,18 +163,21 @@ export function useChessGame({ gameId, token }: UseChessGameOptions): UseChessGa
       setIsLoading(false);
     });
 
+    // Listen for game_error event
+    newSocket.on('game_error', (data: { message: string }) => {
+      console.log('[useChessGame] Error:', data.message);
+      const friendlyMessage = getUserMessage(data.message);
+      setError(friendlyMessage);
+      toast.error(friendlyMessage);
+      setIsLoading(false);
+    });
+
     // Listen for game end events
     newSocket.on('game_ended', (data: { result: string; reason: string }) => {
-      console.log('[useChessGame] Game ended:', data);
+      console.log('[useChessGame] Game ended:', data.result);
       setStatus('ended');
       setResult(data.result as 'white_win' | 'black_win' | 'draw' | 'unknown');
       setEndedReason(data.reason);
-    });
-
-    // Listen for draw offers
-    newSocket.on('draw_offered', (data: { offeredBy: 'w' | 'b' }) => {
-      console.log('[useChessGame] Draw offered by:', data.offeredBy);
-      // You could add a notification or state here to show the draw offer to the other player
     });
 
     setSocket(newSocket);
@@ -177,37 +188,22 @@ export function useChessGame({ gameId, token }: UseChessGameOptions): UseChessGa
     };
   }, [gameId, token]);
 
+  // Calculate if it's the player's turn
+  const isPlayerTurn = playerColor === 'white' ? turn === 'w' : turn === 'b';
+
   // Make a move
   const makeMove = useCallback(
     (from: string, to: string, promotion?: string) => {
-      console.log('[useChessGame] makeMove called with:', {
-        from,
-        to,
-        promotion,
-        socketConnected: socket?.connected,
-        connectionStatus,
-        status,
-        playerColor,
-      });
-
       if (!socket || connectionStatus !== 'connected') {
-        console.log(
-          '[useChessGame] Cannot make move: not connected. Socket:',
-          !!socket,
-          'connectionStatus:',
-          connectionStatus
-        );
         setError('Not connected to server');
         return;
       }
 
       if (status === 'ended') {
-        console.log('[useChessGame] Cannot make move: game has ended');
         setError('Game has ended');
         return;
       }
 
-      console.log('[useChessGame] Emitting make_move event');
       socket.emit('make_move', {
         gameId,
         token,
@@ -248,17 +244,6 @@ export function useChessGame({ gameId, token }: UseChessGameOptions): UseChessGa
 
     socket.emit('accept_draw', { gameId, token });
   }, [socket, connectionStatus, gameId, token]);
-
-  const isPlayerTurn = playerColor === 'white' ? turn === 'w' : turn === 'b';
-
-  console.log('[useChessGame] State summary:', {
-    playerColor,
-    turn,
-    isPlayerTurn,
-    status,
-    connectionStatus,
-    isLoading,
-  });
 
   return {
     fen,

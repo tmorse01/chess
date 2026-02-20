@@ -1,0 +1,26 @@
+/* Dark Luxury Chessboard Theme CSS - Minimal */
+
+.themed-chessboard-wrapper {
+  @apply transition-all duration-300;
+}
+
+/* Base piece styling - subtle shadow only */
+.themed-chessboard-wrapper [data-piece] {
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+  transition: filter 0.15s ease-out;
+}
+
+/* White pieces - very subtle brighten */
+.themed-chessboard-wrapper [data-piece^='w'] svg {
+  filter: brightness(1.05) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+}
+
+/* Black pieces - very subtle darken */
+.themed-chessboard-wrapper [data-piece^='b'] svg {
+  filter: brightness(0.95) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
+}
+
+/* Smooth animations for piece movements */
+.themed-chessboard-wrapper [class*='chessboard'] {
+  @apply will-change-transform;
+}

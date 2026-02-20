@@ -1,7 +1,17 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import type { CreateGameResponse } from '@chess-app/shared';
-import { Copy, Zap, ExternalLink, Crown, Users, Sparkles, Clock, BookOpen, Code2 } from 'lucide-react';
+import {
+  Copy,
+  Zap,
+  ExternalLink,
+  Crown,
+  Users,
+  Sparkles,
+  Clock,
+  BookOpen,
+  Code2,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -58,7 +68,7 @@ function Home() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 py-8">
-      <div className="frosted-glass p-8 md:p-12 max-w-6xl w-full">
+      <div className="p-8 md:p-12 max-w-6xl w-full">
         {!gameData ? (
           <>
             {/* Hero + Playground: two-column on large screens */}
@@ -67,7 +77,7 @@ function Home() {
               <div>
                 <div className="inline-block mb-6 relative">
                   <Crown className="w-16 h-16 mx-auto text-yellow-400" />
-                  <Sparkles className="w-6 h-6 absolute -top-4 -right-4 text-yellow-200 animate-pulse" />
+                  <Sparkles className="w-6 h-6 absolute -top-4 -right-4 text-yellow-400 animate-ping" />
                 </div>
                 <h1 className="text-5xl md:text-6xl font-bold pb-4 bg-linear-to-r from-white via-violet-100 to-violet-200 bg-clip-text text-transparent">
                   Play Chess Online
@@ -139,7 +149,7 @@ function Home() {
             {/* Features Grid */}
             <div className="grid md:grid-cols-3 gap-6 mb-10">
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20 hover:bg-white/15 transition-all">
-                <Users className="w-8 h-8 mb-3 text-violet-400" />
+                <Users className="w-8 h-8 mb-3 text-blue-400" />
                 <h3 className="text-lg font-semibold mb-2">Multiplayer</h3>
                 <p className="text-sm text-white/70">
                   Real-time gameplay with live move updates between players
@@ -153,7 +163,7 @@ function Home() {
                 </p>
               </div>
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20 hover:bg-white/15 transition-all">
-                <Sparkles className="w-8 h-8 mb-3 text-violet-400" />
+                <Sparkles className="w-8 h-8 mb-3 text-yellow-400" />
                 <h3 className="text-lg font-semibold mb-2">Classic Rules</h3>
                 <p className="text-sm text-white/70">
                   Full chess rules with all special moves and endgame detection

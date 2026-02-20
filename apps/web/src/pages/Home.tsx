@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import type { CreateGameResponse } from '@chess-app/shared';
 import {
   Copy,
@@ -20,6 +20,9 @@ import { BoardPlayground } from '@/components/BoardPlayground';
 import { api } from '@/lib/api-client';
 
 function Home() {
+  const navigate = useNavigate();
+  const { gameId: routeGameId } = useParams<{ gameId?: string }>();
+  const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [gameData, setGameData] = useState<CreateGameResponse | null>(null);
@@ -31,8 +34,18 @@ function Home() {
     try {
       const data = await api.games.create();
       setGameData(data);
+      const whiteToken = new URL(data.whiteUrl).searchParams.get('token');
+      const blackToken = new URL(data.blackUrl).searchParams.get('token');
+
+      if (whiteToken && blackToken) {
+        const gameParams = new URLSearchParams({ whiteToken, blackToken });
+        navigate(`/start/${data.gameId}?${gameParams.toString()}`);
+      }
+
+      return data;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
+      return null;
     } finally {
       setLoading(false);
     }
@@ -58,13 +71,35 @@ function Home() {
   }, []);
 
   const createAndJoinAsWhite = async () => {
-    await createGame();
+    const data = await createGame();
     // After game is created, navigate to white player link
-    if (gameData) {
-      const url = new URL(gameData.whiteUrl);
+    if (data) {
+      const url = new URL(data.whiteUrl);
       window.location.href = url.pathname + url.search;
     }
   };
+
+  useEffect(() => {
+    if (gameData) {
+      return;
+    }
+
+    const whiteToken = searchParams.get('whiteToken');
+    const blackToken = searchParams.get('blackToken');
+
+    if (!routeGameId || !whiteToken || !blackToken) {
+      return;
+    }
+
+    const buildPlayerUrl = (token: string) =>
+      `${window.location.origin}/g/${routeGameId}?${new URLSearchParams({ token }).toString()}`;
+
+    setGameData({
+      gameId: routeGameId,
+      whiteUrl: buildPlayerUrl(whiteToken),
+      blackUrl: buildPlayerUrl(blackToken),
+    });
+  }, [gameData, routeGameId, searchParams]);
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 py-8">
@@ -294,7 +329,10 @@ function Home() {
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-2">
               <Button
-                onClick={() => setGameData(null)}
+                onClick={() => {
+                  setGameData(null);
+                  navigate('/');
+                }}
                 variant="outline"
                 size="lg"
                 className="bg-white/10 hover:bg-white/20 border-white/30"

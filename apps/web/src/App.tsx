@@ -12,6 +12,7 @@ function App() {
       <main>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/start/:gameId" element={<Home />} />
           <Route path="/how-it-was-built" element={<HowItWasBuilt />} />
           <Route path="/getting-started" element={<GettingStarted />} />
           <Route

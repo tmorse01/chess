@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Home from './Home';
 import { api } from '@/lib/api-client';
 
@@ -19,10 +19,14 @@ vi.mock('@/components/BoardPlayground', () => ({
   BoardPlayground: () => <div data-testid="board-playground">Board Playground Mock</div>,
 }));
 
-function renderHome() {
+function renderHome(path = '/') {
+  window.history.pushState({}, '', path);
   return render(
     <BrowserRouter>
-      <Home />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/start/:gameId" element={<Home />} />
+      </Routes>
     </BrowserRouter>
   );
 }
@@ -94,6 +98,18 @@ describe('Home', () => {
     expect(inputs).toHaveLength(2);
     expect(inputs[0].value).toBe(mockGameData.whiteUrl);
     expect(inputs[1].value).toBe(mockGameData.blackUrl);
+    expect(window.location.pathname).toBe('/start/test-game-id');
+    expect(window.location.search).toContain('whiteToken=white-token-123');
+    expect(window.location.search).toContain('blackToken=black-token-456');
+  });
+
+  it('should restore game links from start route URL state', () => {
+    renderHome('/start/test-game-id?whiteToken=white-token&blackToken=black-token');
+
+    expect(screen.getByText(/Game Ready!/)).toBeInTheDocument();
+    const inputs = screen.getAllByRole('textbox') as HTMLInputElement[];
+    expect(inputs[0].value).toContain('/g/test-game-id?token=white-token');
+    expect(inputs[1].value).toContain('/g/test-game-id?token=black-token');
   });
 
   it('should display error message on failed creation', async () => {

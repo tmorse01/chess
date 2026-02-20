@@ -26,7 +26,12 @@ const io = new Server(httpServer, {
     origin: CORS_ORIGIN,
     methods: ['GET', 'POST'],
   },
+  transports: ['websocket', 'polling'],
 });
+
+console.log('[INIT] 🔌 Socket.IO configured');
+console.log('[INIT] CORS origin:', CORS_ORIGIN);
+console.log('[INIT] Transports:', ['websocket', 'polling']);
 
 // Set up socket event handlers
 setupGameHandlers(io);
@@ -73,8 +78,11 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
 // Start server (only if not in test mode)
 if (process.env.NODE_ENV !== 'test') {
   httpServer.listen(PORT, () => {
-    console.log(`🚀 API server running on http://localhost:${PORT}`);
-    console.log(`🔌 Socket.IO server ready`);
+    console.log('[INIT] ✅ API server running');
+    console.log('[INIT] URL: http://localhost:' + PORT);
+    console.log('[INIT] Environment:', NODE_ENV);
+    console.log('[INIT] 🔌 Socket.IO ready for connections');
+    console.log('[INIT] CORS origin:', CORS_ORIGIN);
   });
 }
 

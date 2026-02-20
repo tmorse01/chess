@@ -20,13 +20,18 @@ export const apiClient = axios.create({
 /**
  * Socket.IO URL configuration
  * In production: Same origin (no separate URL)
- * In development: Separate socket server
+ * In development: Separate socket server (Socket.IO runs at root, not at /api)
  */
 export const getSocketUrl = (): string => {
   if (import.meta.env.PROD) {
     return window.location.origin;
   }
-  return import.meta.env.VITE_API_URL || 'http://localhost:4000';
+  // Remove /api from the URL - Socket.IO is served at the root of the API server, not under /api
+  // REST API calls use /api prefix, but Socket.IO connects to the root
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+  const socketUrl = apiUrl.replace(/\/api\/?$/, '');
+  console.log('[Socket] Connecting to:', socketUrl);
+  return socketUrl;
 };
 
 /**

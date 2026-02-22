@@ -233,11 +233,11 @@ export function GameInfo({
               ) : (
                 <div className="max-h-[200px] overflow-y-auto rounded border border-border/50 bg-black/20">
                   <div className="p-2 space-y-1">
-                    {moves.map((move, index) => (
+                    {[...moves].reverse().map((move, index) => (
                       <div
                         key={move.moveNumber}
                         className={`flex items-center gap-3 p-1.5 rounded text-sm font-mono ${
-                          index === moves.length - 1
+                          index === 0
                             ? 'bg-violet-500/20 border border-violet-500/30'
                             : 'hover:bg-white/5'
                         }`}

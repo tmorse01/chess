@@ -126,7 +126,11 @@ export function GameInfo({
           </AlertDescription>
         </Alert>
       ) : (
-        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-green-500/10 border border-green-500/30" data-testid="opponent-connected">
+        <div
+          className="flex items-center gap-2 px-3 py-2 rounded-lg bg-green-500/10 border border-green-500/30"
+          data-testid="opponent-connected"
+          aria-label="Opponent connection status: connected"
+        >
           <UserCheck className="w-4 h-4 text-green-400 shrink-0" />
           <span className="text-sm font-medium text-green-300">Opponent connected</span>
         </div>
@@ -137,7 +141,10 @@ export function GameInfo({
         className={`flex items-center gap-3 px-4 py-3 rounded-xl border transition-all duration-300 ${getTurnStyles()}`}
         data-testid="current-turn"
       >
-        <div className={`w-5 h-5 rounded-full shrink-0 ${getTurnPieceColor()}`} />
+        <div
+          className={`w-5 h-5 rounded-full shrink-0 ${getTurnPieceColor()}`}
+          aria-label={status === 'active' ? `${turn === 'w' ? 'White' : 'Black'}'s turn` : undefined}
+        />
         <span className="text-base font-bold">
           {getTurnText()}
         </span>

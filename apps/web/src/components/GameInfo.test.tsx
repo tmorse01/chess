@@ -22,8 +22,7 @@ describe('GameInfo', () => {
 
     // Check for truncated game ID (first 8 characters)
     expect(screen.getByText(/test-gam/i)).toBeDefined();
-    expect(screen.getByText(/You are playing/i)).toBeDefined();
-    expect(screen.getByText(/white/i)).toBeDefined();
+    expect(screen.queryByText(/You are playing/i)).toBeNull();
     expect(screen.getByText(/Your turn/i)).toBeDefined();
   });
 
@@ -105,7 +104,28 @@ describe('GameInfo', () => {
   it('should render for black player', () => {
     render(<GameInfo {...defaultProps} playerColor="black" turn="b" />);
 
-    expect(screen.getByText(/black/i)).toBeDefined();
     expect(screen.getByText(/Your turn/i)).toBeDefined();
+  });
+
+  it('should show opponent connected when game is active', () => {
+    render(<GameInfo {...defaultProps} status="active" />);
+
+    expect(screen.getByText(/Opponent connected/i)).toBeDefined();
+  });
+
+  it('should show move history toggle when game is active', () => {
+    render(<GameInfo {...defaultProps} />);
+
+    expect(screen.getByTestId('move-history-toggle')).toBeDefined();
+    expect(screen.getByText(/Move History/i)).toBeDefined();
+  });
+
+  it('should expand move history when toggle is clicked', () => {
+    render(<GameInfo {...defaultProps} />);
+
+    const toggle = screen.getByTestId('move-history-toggle');
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    fireEvent.click(toggle);
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
   });
 });

@@ -4,6 +4,7 @@ import Home from './pages/Home';
 import Game from './pages/Game';
 import HowItWasBuilt from './pages/HowItWasBuilt';
 import GettingStarted from './pages/GettingStarted';
+import Settings from './pages/Settings';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
           <Route path="/start/:gameId" element={<Home />} />
           <Route path="/how-it-was-built" element={<HowItWasBuilt />} />
           <Route path="/getting-started" element={<GettingStarted />} />
+          <Route path="/settings" element={<Settings />} />
           <Route
             path="/g/:gameId"
             element={

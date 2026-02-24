@@ -11,6 +11,7 @@ import {
   Clock,
   BookOpen,
   Code2,
+  Settings,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -221,6 +222,15 @@ function Home() {
               >
                 <BookOpen className="w-4 h-4" />
                 Getting Started Guide
+              </Link>
+              <span className="hidden sm:inline text-white/20">·</span>
+              <Link
+                to="/settings"
+                className="flex items-center gap-2 hover:text-white/80 transition-colors"
+                data-testid="settings-link"
+              >
+                <Settings className="w-4 h-4" />
+                Game Settings
               </Link>
               <span className="hidden sm:inline text-white/20">·</span>
               <Link
